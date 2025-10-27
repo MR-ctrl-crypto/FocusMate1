@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <PreferenceCategory app:title="Account">
+
+        <Preference
+            app:key="user_account"
+            app:title="Email"
+            app:summary="Loading..." />
+
+        <Preference
+            app:key="manage_account"
+            app:title="Manage Account"
+            app:summary="Update your profile or change password" />
+
+        <SwitchPreference
+            app:key="cloud_sync"
+            app:title="Cloud Sync"
+            app:summary="Sync your settings across devices"
+            app:defaultValue="false" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory app:title="General">
+
+        <SwitchPreference
+            app:key="notifications"
+            app:title="Enable Notifications"
+            app:defaultValue="true" />
+
+        <ListPreference
+            app:key="theme_preference"
+            app:title="Theme"
+            app:summary="%s"
+            app:entries="@array/theme_entries"
+            app:entryValues="@array/theme_values"
+            app:defaultValue="auto" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        app:key="blocked_apps_category"
+        app:title="Blocked Apps">
+
+        <EditTextPreference
+            app:key="add_blocked_app"
+            app:title="Add App to Block"
+            app:dialogTitle="Enter App Name"
+            app:summary="Tap to add an app to the blocklist" />
+
+        <!-- The RecyclerView for the blocked apps list will be inserted here by your code -->
+
+    </PreferenceCategory>
+
+</PreferenceScreen>
+    
