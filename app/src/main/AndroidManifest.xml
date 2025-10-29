@@ -10,18 +10,22 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.FocusMate">
+        android:theme="@style/Theme.FocusMate"
+        tools:targetApi="31">
+
+        <!-- LAUNCHER: Settings Screen (Feature Branch) -->
         <activity
-            android:name=".MainActivity"
+            android:name=".SettingsActivity"
             android:exported="true"
-            android:label="@string/app_name"
-            android:theme="@style/Theme.FocusMate">
+            android:theme="@style/Theme.AppCompat.DayNight">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-    </application>
 
+        <!-- Optional: Keep other activities if they exist -->
+        <!-- <activity android:name=".MainActivity" /> -->
+
+    </application>
 </manifest>

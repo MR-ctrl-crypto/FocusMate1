@@ -1,6 +1,5 @@
 package com.example.focusmate
 
-import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.widget.Button
@@ -8,11 +7,7 @@ import android.widget.ImageView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.ui.semantics.error
-import androidx.compose.ui.semantics.setText
-import androidx.compose.ui.semantics.text
 import com.google.android.material.textfield.TextInputEditText
-import com.example.focusmate.R // Correct R class import
 
 class ManageAccountActivity : AppCompatActivity() {
 
