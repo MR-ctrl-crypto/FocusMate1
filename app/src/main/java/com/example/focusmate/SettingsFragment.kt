@@ -11,10 +11,10 @@ import androidx.preference.ListPreference
 import androidx.preference.Preference
 import androidx.preference.PreferenceCategory
 import androidx.preference.PreferenceFragmentCompat
-import androidx.preference.R
 import androidx.preference.SwitchPreference
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.focusmate.R
 
 class SettingsFragment : PreferenceFragmentCompat() {
     private val blockedApps = mutableSetOf<String>()
@@ -65,7 +65,7 @@ class SettingsFragment : PreferenceFragmentCompat() {
         val blockedAppsCategory = findPreference<PreferenceCategory>("blocked_apps_category")
         val view = layoutInflater.inflate(R.layout.blocked_apps_layout, null) as ViewGroup
         blockedAppsCategory?.removeAll()
-        blockedAppsCategory?.addPreference(Preference(context).apply {
+        blockedAppsCategory?.addPreference(Preference(requireContext()).apply {
             widgetLayoutResource = R.layout.blocked_apps_layout
             isSelectable = false
         })
