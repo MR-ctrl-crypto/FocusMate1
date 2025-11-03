@@ -1,7 +1,9 @@
 package com.example.focusmate
 
+import android.content.Intent // 1. IMPORT INTENT
 import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.Toast
@@ -15,13 +17,26 @@ class ManageAccountActivity : AppCompatActivity() {
     private lateinit var nameEditText: TextInputEditText
     private lateinit var saveButton: Button
 
+    private lateinit var userPreferences: UserPreferences
+    private var selectedImageUri: Uri? = null
+
     // ActivityResultLauncher for picking an image from the gallery
     private val pickImage = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
         uri?.let {
-            // Set the selected image to the ImageView
+            // --- FIX PART 1: TAKE PERSISTENT PERMISSION FOR THE NEW URI ---
+            try {
+                val takeFlags: Int = Intent.FLAG_GRANT_READ_URI_PERMISSION
+                contentResolver.takePersistableUriPermission(it, takeFlags)
+            } catch (e: SecurityException) {
+                // This can happen on some devices/file managers.
+                Log.e("ManageAccountActivity", "Failed to take persistable permission for URI: $it", e)
+                Toast.makeText(this, "Could not save image permission.", Toast.LENGTH_SHORT).show()
+            }
+            // --- END OF FIX ---
+
+            // Store the selected URI and update the ImageView
+            selectedImageUri = it
             profileImageView.setImageURI(it)
-            // Here you would typically save this URI string to SharedPreferences or a database
-            // For now, we just display it.
         }
     }
 
@@ -29,42 +44,55 @@ class ManageAccountActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_manage_account)
 
-        // Add a back button to the ActionBar
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         title = "Manage Account"
 
-        // Initialize views
+        userPreferences = UserPreferences(this)
+
         profileImageView = findViewById(R.id.profile_image_view)
         nameEditText = findViewById(R.id.name_edit_text)
         saveButton = findViewById(R.id.save_button)
 
-        // Set click listener for the profile image
         profileImageView.setOnClickListener {
-            // Launch the image picker
             pickImage.launch("image/*")
         }
 
-        // Set click listener for the save button
         saveButton.setOnClickListener {
             saveAccountChanges()
         }
 
-        // Load existing user data (e.g., from SharedPreferences)
         loadUserData()
     }
 
     private fun loadUserData() {
-        // In a real app, you would load the saved name and profile image URI here.
-        // For example, from SharedPreferences:
-        // val prefs = getSharedPreferences("user_prefs", MODE_PRIVATE)
-        // val savedName = prefs.getString("user_name", "Default Name")
-        // val imageUriString = prefs.getString("user_profile_uri", null)
-        //
-        // nameEditText.setText(savedName)
-        // imageUriString?.let { profileImageView.setImageURI(Uri.parse(it)) }
+        val savedName = userPreferences.getUserName()
+        // It's better to get the URI as a string and parse it
+        val savedImageUriString = userPreferences.getProfileImageUriString()
 
-        // For this example, we'll just set some placeholder text.
-        nameEditText.setText("Your Name")
+        nameEditText.setText(savedName)
+
+        if (!savedImageUriString.isNullOrEmpty()) {
+            val savedUri = Uri.parse(savedImageUriString)
+            selectedImageUri = savedUri
+
+            // --- FIX PART 2: ADD A TRY-CATCH BLOCK FOR SAFETY ---
+            try {
+                // Check if we still have permission to read the URI
+                // The takePersistableUriPermission call ensures this list is not empty.
+                val persistedUris = contentResolver.persistedUriPermissions
+                if (persistedUris.any { it.uri == savedUri }) {
+                    profileImageView.setImageURI(savedUri)
+                } else {
+                    // If permission was lost, show a default image.
+                    profileImageView.setImageResource(R.mipmap.ic_launcher_round)
+                }
+            } catch (e: SecurityException) {
+                Log.e("ManageAccountActivity", "Permission denial for saved URI: $savedUri", e)
+                // If permission was revoked, fall back to a default image.
+                profileImageView.setImageResource(R.mipmap.ic_launcher_round)
+            }
+            // --- END OF FIX ---
+        }
     }
 
     private fun saveAccountChanges() {
@@ -75,23 +103,14 @@ class ManageAccountActivity : AppCompatActivity() {
             return
         }
 
-        // --- Save the data ---
-        // Here you would save the new name and the profile image URI to a persistent storage
-        // like SharedPreferences or a database.
-        //
-        // Example with SharedPreferences:
-        // val prefs = getSharedPreferences("user_prefs", MODE_PRIVATE).edit()
-        // prefs.putString("user_name", newName)
-        // If an image was selected, you would save its URI (as a string) as well.
-        // prefs.apply()
+        // Convert the URI to a string for saving. If null, save null.
+        val imageUriString = selectedImageUri?.toString()
+        userPreferences.saveUserData(newName, imageUriString)
 
         Toast.makeText(this, "Changes saved successfully!", Toast.LENGTH_SHORT).show()
-
-        // Finish the activity and go back to the previous screen
         finish()
     }
 
-    // Handle the ActionBar back button press
     override fun onSupportNavigateUp(): Boolean {
         onBackPressedDispatcher.onBackPressed()
         return true

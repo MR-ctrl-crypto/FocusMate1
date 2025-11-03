@@ -2,6 +2,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES"
+        tools:ignore="QueryAllPackagesPermission" />
+
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -14,6 +17,16 @@
         tools:targetApi="31">
 
         <!-- LAUNCHER: Settings Screen (Feature Branch) -->
+
+        <activity
+            android:name=".MainActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
         <activity
             android:name=".SettingsActivity"
             android:exported="true"
@@ -24,8 +37,27 @@
             </intent-filter>
         </activity>
 
-        <!-- Optional: Keep other activities if they exist -->
-        <!-- <activity android:name=".MainActivity" /> -->
+        <activity
+            android:name=".ManageAccountActivity"
+            android:exported="false"
+            android:label="Manage Account">
+            <!-- You can add a parent activity for the back arrow -->
+            <!-- <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".SettingsActivity" /> -->
+        </activity>
+
+
+        <!-- ADDED FOR THE BLOCKED APPS FEATURE -->
+        <activity
+            android:name=".BlockedAppsActivity"
+            android:exported="false"
+            android:label="Select Apps to Block"
+            android:parentActivityName=".SettingsActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".SettingsActivity" />
+        </activity>
 
     </application>
 </manifest>

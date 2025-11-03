@@ -38,19 +38,21 @@
 
     </PreferenceCategory>
 
-    <PreferenceCategory
-        app:key="blocked_apps_category"
-        app:title="Blocked Apps">
+    <!-- ======================= CORRECTED SECTION ======================= -->
+    <!-- This section is now a single, simple Preference that will act as a button. -->
+    <PreferenceCategory app:title="Focus Settings">
 
-        <EditTextPreference
-            app:key="add_blocked_app"
-            app:title="Add App to Block"
-            app:dialogTitle="Enter App Name"
-            app:summary="Tap to add an app to the blocklist" />
+        <Preference
+            app:key="blocked_apps"
+            app:title="Blocked Apps"
+            app:summary="Select which applications to block"
+            app:icon="@drawable/ic_block" />
 
-        <!-- The RecyclerView for the blocked apps list will be inserted here by your code -->
+        <!-- The EditTextPreference has been removed. -->
+        <!-- Your SettingsFragment will now correctly launch BlockedAppsActivity -->
+        <!-- when this "blocked_apps" preference is clicked. -->
 
     </PreferenceCategory>
+    <!-- ===================== END OF CORRECTED SECTION ==================== -->
 
 </PreferenceScreen>
-    
