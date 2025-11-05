@@ -16,8 +16,7 @@
         android:theme="@style/Theme.FocusMate"
         tools:targetApi="31">
 
-        <!-- LAUNCHER: Settings Screen (Feature Branch) -->
-
+        <!-- THIS IS NOW THE ONE AND ONLY LAUNCHER ACTIVITY -->
         <activity
             android:name=".MainActivity"
             android:exported="true">
@@ -27,28 +26,21 @@
             </intent-filter>
         </activity>
 
+        <!-- SETTINGS ACTIVITY IS NO LONGER A LAUNCHER -->
+        <!-- The intent-filter has been removed from here. -->
         <activity
             android:name=".SettingsActivity"
-            android:exported="true"
+            android:exported="false"
             android:theme="@style/Theme.AppCompat.DayNight">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
+            <!-- No intent filter here -->
         </activity>
 
         <activity
             android:name=".ManageAccountActivity"
             android:exported="false"
             android:label="Manage Account">
-            <!-- You can add a parent activity for the back arrow -->
-            <!-- <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".SettingsActivity" /> -->
         </activity>
 
-
-        <!-- ADDED FOR THE BLOCKED APPS FEATURE -->
         <activity
             android:name=".BlockedAppsActivity"
             android:exported="false"

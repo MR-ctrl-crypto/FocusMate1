@@ -7,4 +7,8 @@
     <color name="teal_700">#FF018786</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="accent_blue">#007AFF</color> <!-- iOS-style blue -->
+    <color name="accent_blue_light">#EBF5FF</color> <!-- A light variant for the timer circle -->
+    <color name="red">#FF008AFF</color>
 </resources>
+

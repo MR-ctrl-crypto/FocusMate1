@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+
+    <!-- This sets the solid background color of the button.
+         It uses the accent_blue color you should have in your colors.xml file. -->
+    <solid android:color="@color/accent_blue" />
+
+    <!-- This gives the button rounded corners. -->
+    <corners android:radius="12dp" />
+
+</shape>

@@ -18,10 +18,15 @@ class MainActivity : AppCompatActivity() {
             var selectedFragment: Fragment? = null
             when (item.itemId) {
                 R.id.nav_home -> selectedFragment = HomeFragment()
-                // R.id.nav_analytics -> selectedFragment = AnalyticsFragment() // For Later
+
+                R.id.nav_analytics -> selectedFragment = Analytics()
                 // R.id.nav_timetable -> selectedFragment = TimetableFragment() // For Later
-                // R.id.nav_timer -> selectedFragment = TimerFragment() // For Later
-                R.id.nav_settings -> selectedFragment = SettingsFragment() // We already have this one!
+
+                // --- THIS IS THE LINE YOU NEED TO ADD/UNCOMMENT ---
+                R.id.nav_timer -> selectedFragment = TimerFragment()
+                // ----------------------------------------------------
+
+                R.id.nav_settings -> selectedFragment = SettingsFragment()
             }
 
             // Replace the content of the fragment container with the new fragment
@@ -33,11 +38,10 @@ class MainActivity : AppCompatActivity() {
             true
         }
 
-        // Set the default screen to be displayed when the app starts
+        // Set the default screen to be displayed when the app starts.
+        // This remains unchanged, Home is still the default.
         if (savedInstanceState == null) {
-            // Set the default selection
             bottomNavView.selectedItemId = R.id.nav_home
         }
     }
 }
-    
