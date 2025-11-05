@@ -7,6 +7,7 @@ import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.Menu
+import android.view.MenuInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.CheckBox
@@ -15,6 +16,7 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
 import androidx.appcompat.widget.Toolbar
+import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.coroutines.Dispatchers
@@ -30,52 +32,68 @@ data class AppInfo(
     var isSelected: Boolean = false
 )
 
-class BlockedAppsActivity : AppCompatActivity() {
+class BlockedAppsFragment : Fragment() {
 
     private lateinit var recyclerView: RecyclerView
     private lateinit var appAdapter: AppAdapter
+    private lateinit var toolbar: Toolbar
 
-    // CHANGED: Two lists are now used. One for all apps, one for what's displayed.
+    // Two lists are used: one for all apps (the master list), and one for what's currently displayed (the filtered list).
     private var allApps = mutableListOf<AppInfo>()
     private var currentlyDisplayedApps = mutableListOf<AppInfo>()
 
+    // This holds the package names of the apps the user has selected.
     private lateinit var blockedAppsPrefs: MutableSet<String>
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_blocked_apps)
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        // Inflate the layout for this fragment. This connects the Kotlin code to the XML file.
+        val view = inflater.inflate(R.layout.fragment_blocked_apps, container, false)
+        setHasOptionsMenu(true) // IMPORTANT: This tells the fragment that it has its own options menu (the search bar).
+        return view
+    }
 
-        // Set up the toolbar
-        val toolbar: Toolbar = findViewById(R.id.toolbar)
-        setSupportActionBar(toolbar)
-        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 
-        // Load the set of currently blocked apps from SharedPreferences
-        val sharedPreferences = getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
+        // --- Setup Toolbar ---
+        toolbar = view.findViewById(R.id.toolbar)
+        (activity as AppCompatActivity).setSupportActionBar(toolbar) // Cast the fragment's activity to an AppCompatActivity.
+        (activity as AppCompatActivity).supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        toolbar.setNavigationOnClickListener {
+            // Handle the back arrow click
+            parentFragmentManager.popBackStack()
+        }
+
+        // --- Load Preferences ---
+        // Access SharedPreferences using the fragment's context.
+        val sharedPreferences = requireActivity().getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
         blockedAppsPrefs = sharedPreferences.getStringSet("blocked_apps", mutableSetOf())?.toMutableSet() ?: mutableSetOf()
 
-        // Set up the RecyclerView
-        recyclerView = findViewById(R.id.apps_recycler_view)
-        recyclerView.layoutManager = LinearLayoutManager(this)
+        // --- Setup RecyclerView ---
+        recyclerView = view.findViewById(R.id.apps_recycler_view)
+        recyclerView.layoutManager = LinearLayoutManager(requireContext())
 
-        // CHANGED: Initialize the adapter with the list that will be filtered.
+        // Initialize the adapter with the list that will be filtered and displayed.
         appAdapter = AppAdapter(currentlyDisplayedApps)
         recyclerView.adapter = appAdapter
 
-        // Start loading the list of apps
+        // --- Start Loading Apps ---
         loadInstalledApps()
     }
 
     private fun loadInstalledApps() {
-        // Loading apps can be slow, so we do it on a background thread
+        // Loading apps can be slow, so it's done on a background thread using Coroutines.
         GlobalScope.launch(Dispatchers.IO) {
-            val pm: PackageManager = packageManager
+            val pm: PackageManager = requireActivity().packageManager
             val packages = pm.getInstalledApplications(PackageManager.GET_META_DATA)
             val appList = mutableListOf<AppInfo>()
 
             for (packageInfo in packages) {
-                // Filter out system apps and this app itself
-                if ((packageInfo.flags and ApplicationInfo.FLAG_SYSTEM) == 0 && packageInfo.packageName != packageName) {
+                // Filter out system apps and this app itself.
+                if ((packageInfo.flags and ApplicationInfo.FLAG_SYSTEM) == 0 && packageInfo.packageName != requireActivity().packageName) {
                     val appName = packageInfo.loadLabel(pm).toString()
                     val packageName = packageInfo.packageName
                     val appIcon = packageInfo.loadIcon(pm)
@@ -83,39 +101,33 @@ class BlockedAppsActivity : AppCompatActivity() {
                     appList.add(AppInfo(appName, packageName, appIcon, isSelected))
                 }
             }
-            // Sort the list alphabetically
+            // Sort the list alphabetically.
             appList.sortBy { it.name }
 
-            // Switch back to the main thread to update the UI
+            // Switch back to the main thread to update the UI.
             withContext(Dispatchers.Main) {
-                // CHANGED: Populate both lists and notify the adapter.
                 allApps.clear()
                 allApps.addAll(appList)
                 currentlyDisplayedApps.clear()
                 currentlyDisplayedApps.addAll(allApps)
-                appAdapter.notifyDataSetChanged() // Refresh the list in the UI
+                appAdapter.notifyDataSetChanged() // Refresh the list in the UI.
             }
         }
     }
 
-    // Save the selections when the activity is paused or destroyed
+    // --- Save Selections ---
+    // Save the selections when the fragment is paused (e.g., when the user navigates away).
     override fun onPause() {
         super.onPause()
-        // IMPORTANT: We filter the 'allApps' list to ensure we don't lose selections that are hidden by a search filter.
+        // IMPORTANT: We filter the 'allApps' master list to ensure we don't lose selections that are hidden by a search filter.
         val selectedApps = allApps.filter { it.isSelected }.map { it.packageName }.toSet()
-        val sharedPreferences = getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
+        val sharedPreferences = requireActivity().getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
         sharedPreferences.edit().putStringSet("blocked_apps", selectedApps).apply()
     }
 
-    // Handle the back arrow in the toolbar
-    override fun onSupportNavigateUp(): Boolean {
-        onBackPressed()
-        return true
-    }
-
-    // NEW: Inflate the menu for the search bar
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        menuInflater.inflate(R.menu.search_menu, menu)
+    // --- Search Menu ---
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        inflater.inflate(R.menu.search_menu, menu)
         val searchItem = menu.findItem(R.id.action_search)
         val searchView = searchItem.actionView as SearchView
 
@@ -123,36 +135,35 @@ class BlockedAppsActivity : AppCompatActivity() {
 
         searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String?): Boolean {
-                // Not needed as we filter in real-time
-                return false
+                return false // Not needed as we filter in real-time.
             }
 
             override fun onQueryTextChange(newText: String?): Boolean {
-                // Filter the list as the user types
+                // Filter the list as the user types.
                 filterApps(newText.orEmpty())
                 return true
             }
         })
-        return true
+        super.onCreateOptionsMenu(menu, inflater)
     }
 
-    // NEW: Function to filter the app list based on a search query
+    // --- Filter Logic ---
     private fun filterApps(query: String) {
         val filteredList = if (query.isEmpty()) {
-            allApps
+            allApps // If the search is empty, show all apps.
         } else {
-            // Filter the master list 'allApps'
+            // Otherwise, filter the master list 'allApps'.
             allApps.filter { it.name.contains(query, ignoreCase = true) }
         }
 
-        // Update the displayed list and notify the adapter
+        // Update the displayed list and notify the adapter.
         currentlyDisplayedApps.clear()
         currentlyDisplayedApps.addAll(filteredList)
         appAdapter.notifyDataSetChanged()
     }
 
     // --- RecyclerView Adapter ---
-    // CHANGED: The adapter now takes a MutableList to allow for filtering
+    // The adapter's code remains largely the same, but it's now an inner class of the fragment.
     class AppAdapter(private var apps: MutableList<AppInfo>) : RecyclerView.Adapter<AppAdapter.ViewHolder>() {
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -166,10 +177,15 @@ class BlockedAppsActivity : AppCompatActivity() {
             holder.appIcon.setImageDrawable(app.icon)
             holder.appCheckbox.isChecked = app.isSelected
 
-            // When a row is clicked, toggle the selection
+            // When a row is clicked, toggle the selection state of the app
             holder.itemView.setOnClickListener {
                 app.isSelected = !app.isSelected
                 holder.appCheckbox.isChecked = app.isSelected
+            }
+
+            // Also allow clicking the checkbox itself
+            holder.appCheckbox.setOnClickListener {
+                app.isSelected = holder.appCheckbox.isChecked
             }
         }
 

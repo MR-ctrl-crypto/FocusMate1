@@ -13,12 +13,9 @@ import androidx.preference.PreferenceFragmentCompat
 
 class SettingsFragment : PreferenceFragmentCompat() {
 
-    // Get a reference to the same ViewModel instance as the activity
+    // ... (Your existing code for viewModel, prefs, and pickImageLauncher remains here)
     private val profileViewModel: ProfileViewModel by activityViewModels()
-
     private lateinit var prefs: SharedPreferences
-
-    // Activity result launcher for picking an image from the gallery
     private val pickImageLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
             val selectedImageUri: Uri? = result.data?.data
@@ -30,12 +27,13 @@ class SettingsFragment : PreferenceFragmentCompat() {
         }
     }
 
+
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         setPreferencesFromResource(R.xml.preferences, rootKey)
 
         prefs = preferenceManager.sharedPreferences!!
 
-        // --- USERNAME PREFERENCE --- (No changes here)
+        // --- All your existing preference listeners for username, profile picture, and manage account remain here ---
         val usernamePreference: EditTextPreference? = findPreference("username")
         usernamePreference?.summaryProvider = Preference.SummaryProvider<EditTextPreference> { preference ->
             val text = preference.text
@@ -46,7 +44,6 @@ class SettingsFragment : PreferenceFragmentCompat() {
             true
         }
 
-        // --- PROFILE PICTURE PREFERENCE --- (No changes here)
         val profilePicturePreference: Preference? = findPreference("profile_picture")
         profilePicturePreference?.setOnPreferenceClickListener {
             val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
@@ -57,33 +54,39 @@ class SettingsFragment : PreferenceFragmentCompat() {
             true
         }
 
-        // ======================= NEW CODE START =======================
-        // --- MANAGE ACCOUNT PREFERENCE ---
         val manageAccountPreference: Preference? = findPreference("manage_account")
         manageAccountPreference?.setOnPreferenceClickListener {
-            // Create an instance of the new fragment
             val manageAccountFragment = ManageAccountFragment()
+            parentFragmentManager.beginTransaction()
+                .replace(R.id.nav_host_fragment, manageAccountFragment)
+                .addToBackStack(null)
+                .commit()
+            true
+        }
+
+        // ======================= NEW CODE FOR BLOCKED APPS =======================
+        val blockedAppsPreference: Preference? = findPreference("blocked_apps")
+        blockedAppsPreference?.setOnPreferenceClickListener {
+            // Create an instance of the new fragment
+            val blockedAppsFragment = BlockedAppsFragment()
 
             // Use the FragmentManager to replace the current fragment with the new one
             parentFragmentManager.beginTransaction()
-                .replace(R.id.nav_host_fragment, manageAccountFragment)
-                .addToBackStack(null) // This allows the user to press the back button to return to settings
+                .replace(R.id.nav_host_fragment, blockedAppsFragment)
+                .addToBackStack(null) // Allows the user to press back to return to settings
                 .commit()
 
             true // Return true to indicate the click was handled
         }
-        // ======================= NEW CODE END =======================
+        // ======================= END OF NEW CODE =======================
 
-        // --- Load initial values on fragment creation ---
         loadInitialProfileData()
     }
 
+    // ... (Your loadInitialProfileData and takeUriPermission functions remain here)
     private fun loadInitialProfileData() {
-        // Load username from SharedPreferences and update the ViewModel
         val savedUsername = prefs.getString("username", "User") ?: "User"
         profileViewModel.updateUsername(savedUsername)
-
-        // Load profile picture URI from SharedPreferences and update the ViewModel
         val savedImageUriString = prefs.getString("profile_image_uri", null)
         if (savedImageUriString != null) {
             profileViewModel.updateProfileImageUri(Uri.parse(savedImageUriString))
@@ -91,7 +94,6 @@ class SettingsFragment : PreferenceFragmentCompat() {
     }
 
     private fun takeUriPermission(uri: Uri): Uri {
-        // Persist access permissions so the app can still access the image after a restart.
         val contentResolver = requireActivity().contentResolver
         val takeFlags: Int = Intent.FLAG_GRANT_READ_URI_PERMISSION
         contentResolver.takePersistableUriPermission(uri, takeFlags)
