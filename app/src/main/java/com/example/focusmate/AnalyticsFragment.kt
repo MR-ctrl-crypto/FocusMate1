@@ -15,7 +15,7 @@ import com.github.mikephil.charting.formatter.IndexAxisValueFormatter
 import android.widget.Button
 import android.widget.TextView
 
-class Analytics : Fragment() {
+class AnalyticsFragment : Fragment() {
 
     // Declaring UI components
     private lateinit var barChart: BarChart

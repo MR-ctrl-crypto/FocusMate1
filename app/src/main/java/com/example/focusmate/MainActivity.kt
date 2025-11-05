@@ -47,7 +47,7 @@ class MainActivity : AppCompatActivity() {
             var selectedFragment: Fragment? = null
             when (item.itemId) {
                 R.id.nav_home -> selectedFragment = HomeFragment()
-                R.id.nav_analytics -> selectedFragment = Analytics()
+                R.id.nav_analytics -> selectedFragment = AnalyticsFragment()
                 R.id.nav_timetable -> selectedFragment = TimetableFragment()
                 R.id.nav_timer -> selectedFragment = TimerFragment()
                 R.id.nav_settings -> selectedFragment = SettingsFragment()
