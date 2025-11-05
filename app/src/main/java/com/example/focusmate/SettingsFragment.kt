@@ -1,126 +1,100 @@
-import android.content.Context
+package com.example.focusmate
+
+import android.app.Activity
+import android.content.Intent
+import android.content.SharedPreferences
+import android.net.Uri
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import android.widget.ImageView
-import android.widget.TextView
-import androidx.appcompat.app.AppCompatDelegate
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.fragment.app.activityViewModels
 import androidx.preference.EditTextPreference
-import androidx.preference.ListPreference
 import androidx.preference.Preference
-import androidx.preference.PreferenceCategory
 import androidx.preference.PreferenceFragmentCompat
-import androidx.preference.R
-import androidx.preference.SwitchPreference
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 
 class SettingsFragment : PreferenceFragmentCompat() {
-    private val blockedApps = mutableSetOf<String>()
+
+    // Get a reference to the same ViewModel instance as the activity
+    private val profileViewModel: ProfileViewModel by activityViewModels()
+
+    private lateinit var prefs: SharedPreferences
+
+    // Activity result launcher for picking an image from the gallery
+    private val pickImageLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            val selectedImageUri: Uri? = result.data?.data
+            if (selectedImageUri != null) {
+                val permanentUri = takeUriPermission(selectedImageUri)
+                prefs.edit().putString("profile_image_uri", permanentUri.toString()).apply()
+                profileViewModel.updateProfileImageUri(permanentUri)
+            }
+        }
+    }
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         setPreferencesFromResource(R.xml.preferences, rootKey)
 
-        // User Account (Static Display)
-        findPreference<Preference>("user_account")?.summary = "alex.johnson@example.com"
+        prefs = preferenceManager.sharedPreferences!!
 
-        // Manage Account (Navigate to a new screen or activity)
-        findPreference<Preference>("manage_account")?.setOnPreferenceClickListener {
-            // Launch ManageAccountActivity or handle account management
+        // --- USERNAME PREFERENCE --- (No changes here)
+        val usernamePreference: EditTextPreference? = findPreference("username")
+        usernamePreference?.summaryProvider = Preference.SummaryProvider<EditTextPreference> { preference ->
+            val text = preference.text
+            if (text.isNullOrBlank()) "Not set" else text
+        }
+        usernamePreference?.setOnPreferenceChangeListener { _, newValue ->
+            profileViewModel.updateUsername(newValue.toString())
             true
         }
 
-        // Cloud Sync (Placeholder Logic)
-        findPreference<SwitchPreference>("cloud_sync")?.setOnPreferenceChangeListener { _, newValue ->
-            val isEnabled = newValue as Boolean
-            if (isEnabled) {
-                // Add your custom sync logic here
-            } else {
-                // Disable sync logic
+        // --- PROFILE PICTURE PREFERENCE --- (No changes here)
+        val profilePicturePreference: Preference? = findPreference("profile_picture")
+        profilePicturePreference?.setOnPreferenceClickListener {
+            val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
+                addCategory(Intent.CATEGORY_OPENABLE)
+                type = "image/*"
             }
+            pickImageLauncher.launch(intent)
             true
         }
 
-        // Notifications
-        findPreference<SwitchPreference>("notifications")?.setOnPreferenceChangeListener { _, newValue ->
-            // Handle notification enable/disable
-            true
+        // ======================= NEW CODE START =======================
+        // --- MANAGE ACCOUNT PREFERENCE ---
+        val manageAccountPreference: Preference? = findPreference("manage_account")
+        manageAccountPreference?.setOnPreferenceClickListener {
+            // Create an instance of the new fragment
+            val manageAccountFragment = ManageAccountFragment()
+
+            // Use the FragmentManager to replace the current fragment with the new one
+            parentFragmentManager.beginTransaction()
+                .replace(R.id.nav_host_fragment, manageAccountFragment)
+                .addToBackStack(null) // This allows the user to press the back button to return to settings
+                .commit()
+
+            true // Return true to indicate the click was handled
         }
+        // ======================= NEW CODE END =======================
 
-        // Blocked Apps (Custom Logic for Adding Apps)
-        findPreference<EditTextPreference>("add_blocked_app")?.setOnPreferenceChangeListener { _, newValue ->
-            val appName = newValue as String
-            if (appName.isNotEmpty()) {
-                blockedApps.add(appName.lowercase())
-                // Save to SharedPreferences
-                saveBlockedApps()
-                true
-            } else {
-                false
-            }
-        }
+        // --- Load initial values on fragment creation ---
+        loadInitialProfileData()
+    }
 
-        // Custom layout for Blocked Apps
-        val blockedAppsCategory = findPreference<PreferenceCategory>("blocked_apps_category")
-        val view = layoutInflater.inflate(R.layout.blocked_apps_layout, null) as ViewGroup
-        blockedAppsCategory?.removeAll()
-        blockedAppsCategory?.addPreference(Preference(context).apply {
-            widgetLayoutResource = R.layout.blocked_apps_layout
-            isSelectable = false
-        })
+    private fun loadInitialProfileData() {
+        // Load username from SharedPreferences and update the ViewModel
+        val savedUsername = prefs.getString("username", "User") ?: "User"
+        profileViewModel.updateUsername(savedUsername)
 
-        // Initialize RecyclerView
-        val recyclerView = view.findViewById<RecyclerView>(R.id.blocked_apps_recycler)
-        recyclerView.layoutManager = LinearLayoutManager(context)
-        val adapter = BlockedAppsAdapter(blockedApps) { app -> blockedApps.remove(app); saveBlockedApps() }
-        recyclerView.adapter = adapter
-
-        // Theme
-        findPreference<ListPreference>("theme_preference")?.setOnPreferenceChangeListener { _, newValue ->
-            val theme = newValue as String
-            when (theme) {
-                "light" -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
-                "dark" -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
-                "auto" -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
-            }
-            true
+        // Load profile picture URI from SharedPreferences and update the ViewModel
+        val savedImageUriString = prefs.getString("profile_image_uri", null)
+        if (savedImageUriString != null) {
+            profileViewModel.updateProfileImageUri(Uri.parse(savedImageUriString))
         }
     }
 
-    private fun saveBlockedApps() {
-        val sharedPreferences = requireContext().getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
-        sharedPreferences.edit().putStringSet("blocked_apps", blockedApps).apply()
-    }
-
-    override fun onResume() {
-        super.onResume()
-        // Load blocked apps on resume to reflect changes
-        val sharedPreferences = requireContext().getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
-        blockedApps.addAll(sharedPreferences.getStringSet("blocked_apps", emptySet()) ?: emptySet())
-    }
-
-    // Nested Adapter Class
-    class BlockedAppsAdapter(
-        private val apps: MutableSet<String>,
-        private val onRemove: (String) -> Unit
-    ) : RecyclerView.Adapter<BlockedAppsAdapter.ViewHolder>() {
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-            val view = LayoutInflater.from(parent.context).inflate(R.layout.item_blocked_app, parent, false)
-            return ViewHolder(view)
-        }
-
-        override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-            val app = apps.elementAt(position)
-            holder.appName.text = app
-            holder.removeButton.setOnClickListener { onRemove(app) }
-        }
-
-        override fun getItemCount() = apps.size
-
-        class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-            val appName: TextView = itemView.findViewById(android.R.id.text1)
-            val removeButton: ImageView = itemView.findViewById(android.R.id.button1)
-        }
+    private fun takeUriPermission(uri: Uri): Uri {
+        // Persist access permissions so the app can still access the image after a restart.
+        val contentResolver = requireActivity().contentResolver
+        val takeFlags: Int = Intent.FLAG_GRANT_READ_URI_PERMISSION
+        contentResolver.takePersistableUriPermission(uri, takeFlags)
+        return uri
     }
 }

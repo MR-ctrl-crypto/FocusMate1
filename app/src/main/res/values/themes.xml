@@ -1,5 +1,21 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Base application theme. -->
+    <style name="Base.Theme.FocusMate" parent="Theme.Material3.DayNight.NoActionBar"> <!-- MUST BE .NoActionBar -->
+        <!-- Customize your light theme here. -->
+    </style>
 
-    <style name="Theme.FocusMate" parent="android:Theme.Material.Light.NoActionBar" />
+    <style name="Theme.FocusMate" parent="Base.Theme.FocusMate" />
+    <!-- STYLES FOR THE CALENDAR VIEW -->
+    <style name="CalenderViewCustom" parent="Theme.AppCompat">
+        <item name="colorAccent">?attr/colorPrimary</item>
+        <item name="android:windowIsTranslucent">true</item>
+    </style>
+
+    <style name="CalenderViewDateCustomText" parent="android:TextAppearance.DeviceDefault.Small">
+        <item name="android:textColor">?attr/colorOnSurface</item>
+    </style>
+
+    <style name="CalenderViewWeekCustomText" parent="android:TextAppearance.DeviceDefault.Small">
+        <item name="android:textColor">?android:attr/textColorSecondary</item>
+    </style>
 </resources>

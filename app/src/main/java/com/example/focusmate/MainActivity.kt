@@ -1,47 +1,69 @@
 package com.example.focusmate
 
 import android.os.Bundle
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import com.example.focusmate.ui.theme.FocusMateTheme
+import android.widget.TextView
+import androidx.activity.viewModels
+import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.Fragment
+import com.google.android.material.bottomnavigation.BottomNavigationView
+import de.hdodenhof.circleimageview.CircleImageView
 
-class MainActivity : ComponentActivity() {
+class MainActivity : AppCompatActivity() {
+
+    private lateinit var profileNameText: TextView
+    private lateinit var profileImageView: CircleImageView
+
+    // Initialize the shared ViewModel using the activity-ktx delegate
+    private val profileViewModel: ProfileViewModel by viewModels()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
-        setContent {
-            FocusMateTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )
-                }
+        setContentView(R.layout.activity_main)
+
+        profileNameText = findViewById(R.id.text_profile_name)
+        profileImageView = findViewById(R.id.image_profile_picture)
+
+        // --- OBSERVE LIVE DATA ---
+        // This block will execute whenever the username in the ViewModel changes
+        profileViewModel.username.observe(this) { newName ->
+            profileNameText.text = newName
+        }
+
+        // This block will execute whenever the profile image URI in the ViewModel changes
+        profileViewModel.profileImageUri.observe(this) { newUri ->
+            if (newUri != null) {
+                profileImageView.setImageURI(newUri)
+            } else {
+                // If the URI is null (e.g., no picture set), show the placeholder
+                profileImageView.setImageResource(R.drawable.ic_profile_placeholder)
             }
         }
-    }
-}
+        // --- END OF OBSERVE ---
 
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
+        val bottomNavView: BottomNavigationView = findViewById(R.id.bottom_navigation_view)
 
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    FocusMateTheme {
-        Greeting("Android")
+        // The listener for item clicks remains unchanged
+        bottomNavView.setOnItemSelectedListener { item ->
+            var selectedFragment: Fragment? = null
+            when (item.itemId) {
+                R.id.nav_home -> selectedFragment = HomeFragment()
+                R.id.nav_analytics -> selectedFragment = Analytics()
+                R.id.nav_timetable -> selectedFragment = TimetableFragment()
+                R.id.nav_timer -> selectedFragment = TimerFragment()
+                R.id.nav_settings -> selectedFragment = SettingsFragment()
+            }
+
+            if (selectedFragment != null) {
+                supportFragmentManager.beginTransaction()
+                    .replace(R.id.nav_host_fragment, selectedFragment)
+                    .commit()
+            }
+            true
+        }
+
+        // Set the default screen to be displayed when the app starts
+        if (savedInstanceState == null) {
+            bottomNavView.selectedItemId = R.id.nav_home
+        }
     }
 }

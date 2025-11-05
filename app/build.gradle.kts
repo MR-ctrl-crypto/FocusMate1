@@ -53,6 +53,13 @@ dependencies {
     implementation("androidx.appcompat:appcompat:1.7.0")
     implementation("androidx.preference:preference-ktx:1.2.1")
     implementation("androidx.recyclerview:recyclerview:1.3.2")
+    implementation("androidx.constraintlayout:constraintlayout:2.1.4")
+    implementation("com.google.android.material:material:1.12.0")
+    implementation(libs.androidx.navigation.fragment)
+    implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
+    implementation("de.hdodenhof:circleimageview:3.1.0")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.8.3")
+    implementation("androidx.activity:activity-ktx:1.9.0") // For the viewModels delegate
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

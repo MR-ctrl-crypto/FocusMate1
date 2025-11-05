@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="?attr/colorSurface"
+    tools:context=".TimerFragment">
+
+    <!-- Screen Title -->
+    <TextView
+        android:id="@+id/title_focus_timer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:text="Focus Timer"
+        android:textSize="28sp"
+        android:textStyle="bold"
+        android:textColor="?attr/colorOnSurface"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- Wrapper for the timer and its edit button -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/timer_wrapper"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="48dp"
+        app:layout_constraintTop_toBottomOf="@id/title_focus_timer"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <!-- Large Circular Timer -->
+        <FrameLayout
+            android:id="@+id/timer_container"
+            android:layout_width="260dp"
+            android:layout_height="260dp"
+            android:background="@drawable/timer_circle_background"
+            android:elevation="8dp"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
+
+            <TextView
+                android:id="@+id/timer_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="25:00"
+                android:textSize="56sp"
+                android:textStyle="bold"
+                android:textColor="?attr/colorPrimary"
+                android:layout_gravity="center" />
+
+            <TextView
+                android:id="@+id/timer_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Focus Session"
+                android:textSize="16sp"
+                android:textColor="?android:attr/textColorSecondary"
+                android:layout_gravity="center"
+                android:layout_marginTop="45dp"/>
+        </FrameLayout>
+
+        <!-- Edit Timer Button -->
+        <ImageButton
+            android:id="@+id/button_edit_timer"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:src="@drawable/ic_edit"
+            android:background="@drawable/timer_circle_background"
+            android:contentDescription="Edit Timer"
+            android:elevation="10dp"
+            app:tint="?attr/colorPrimary"
+            app:layout_constraintTop_toTopOf="@id/timer_container"
+            app:layout_constraintEnd_toEndOf="@id/timer_container"/>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <!-- Control Buttons -->
+    <LinearLayout
+        android:id="@+id/control_buttons"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="32dp"
+        app:layout_constraintTop_toBottomOf="@id/timer_wrapper"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:gravity="center">
+
+        <Button
+            android:id="@+id/button_pause"
+            style="?android:attr/borderlessButtonStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="50dp"
+            android:text="Pause"
+            android:background="@drawable/button_outlined_blue"
+            android:textColor="?attr/colorPrimary"
+            android:layout_marginEnd="8dp"/>
+
+        <Button
+            android:id="@+id/button_start"
+            style="?android:attr/borderlessButtonStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="50dp"
+            android:text="Start"
+            android:background="@drawable/button_solid_blue"
+            android:textColor="?attr/colorOnPrimary"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp"/>
+
+        <Button
+            android:id="@+id/button_stop"
+            style="?android:attr/borderlessButtonStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="50dp"
+            android:text="Stop"
+            android:background="@drawable/button_solid_red"
+            android:textColor="@android:color/white"
+            android:layout_marginStart="8dp"/>
+    </LinearLayout>
+
+    <!-- Distraction Blocking Section -->
+    <LinearLayout
+        android:id="@+id/distraction_section"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginTop="40dp"
+        android:layout_marginStart="24dp"
+        android:layout_marginEnd="24dp"
+        app:layout_constraintTop_toBottomOf="@id/control_buttons"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Distraction Blocking"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:textColor="?attr/colorOnSurface"/>
+
+        <com.google.android.material.switchmaterial.SwitchMaterial
+            android:id="@+id/switch_silence_notifications"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Silence Notifications"
+            android:textSize="16sp"
+            android:checked="true"/>
+
+        <com.google.android.material.switchmaterial.SwitchMaterial
+            android:id="@+id/switch_block_social_media"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Block Social Media Apps"
+            android:textSize="16sp"
+            android:checked="false"/>
+    </LinearLayout>
+
+    <!-- Earned Badges Section -->
+    <LinearLayout
+        android:id="@+id/badges_section"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginTop="24dp"
+        android:layout_marginStart="24dp"
+        android:layout_marginEnd="24dp"
+        app:layout_constraintTop_toBottomOf="@id/distraction_section"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Earned Badges"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:textColor="?attr/colorOnSurface"/>
+
+        <LinearLayout
+            android:id="@+id/badges_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="12dp"
+            android:gravity="center_vertical">
+
+            <!-- Badges are added dynamically from TimerFragment.kt -->
+
+        </LinearLayout>
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
