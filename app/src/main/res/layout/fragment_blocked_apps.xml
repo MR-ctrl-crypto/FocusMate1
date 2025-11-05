@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".BlockedAppsActivity">
+
+    <!-- 1. THIS IS THE TOOLBAR YOUR KOTLIN CODE IS LOOKING FOR -->
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="?attr/colorPrimary"
+        app:title="Select Apps to Block"
+        app:titleTextColor="@android:color/white" />
+
+    <!-- 2. THIS IS THE RECYCLERVIEW YOUR KOTLIN CODE IS LOOKING FOR -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/apps_recycler_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:listitem="@layout/item_app_to_block" />
+
+</LinearLayout>

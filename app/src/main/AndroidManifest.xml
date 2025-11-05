@@ -41,15 +41,17 @@
             android:label="Manage Account">
         </activity>
 
-        <activity
-            android:name=".BlockedAppsActivity"
-            android:exported="false"
-            android:label="Select Apps to Block"
-            android:parentActivityName=".SettingsActivity">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".SettingsActivity" />
-        </activity>
+
+<!--Deprecated-->
+<!--        <activity-->
+<!--            android:name=".BlockedAppsActivity"-->
+<!--            android:exported="false"-->
+<!--            android:label="Select Apps to Block"-->
+<!--            android:parentActivityName=".SettingsActivity">-->
+<!--            <meta-data-->
+<!--                android:name="android.support.PARENT_ACTIVITY"-->
+<!--                android:value=".SettingsActivity" />-->
+<!--        </activity>-->
 
     </application>
 </manifest>
