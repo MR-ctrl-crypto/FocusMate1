@@ -20,7 +20,7 @@ class MainActivity : AppCompatActivity() {
                 R.id.nav_home -> selectedFragment = HomeFragment()
 
                 R.id.nav_analytics -> selectedFragment = Analytics()
-                // R.id.nav_timetable -> selectedFragment = TimetableFragment() // For Later
+                R.id.nav_timetable -> selectedFragment = TimetableFragment() // For Later
 
                 // --- THIS IS THE LINE YOU NEED TO ADD/UNCOMMENT ---
                 R.id.nav_timer -> selectedFragment = TimerFragment()

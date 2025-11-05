@@ -5,4 +5,17 @@
     </style>
 
     <style name="Theme.FocusMate" parent="Base.Theme.FocusMate" />
+    <!-- STYLES FOR THE CALENDAR VIEW -->
+    <style name="CalenderViewCustom" parent="Theme.AppCompat">
+        <item name="colorAccent">?attr/colorPrimary</item>
+        <item name="android:windowIsTranslucent">true</item>
+    </style>
+
+    <style name="CalenderViewDateCustomText" parent="android:TextAppearance.DeviceDefault.Small">
+        <item name="android:textColor">?attr/colorOnSurface</item>
+    </style>
+
+    <style name="CalenderViewWeekCustomText" parent="android:TextAppearance.DeviceDefault.Small">
+        <item name="android:textColor">?android:attr/textColorSecondary</item>
+    </style>
 </resources>
