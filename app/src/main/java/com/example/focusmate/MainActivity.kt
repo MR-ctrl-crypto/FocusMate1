@@ -2,68 +2,82 @@ package com.example.focusmate
 
 import android.os.Bundle
 import android.widget.TextView
-import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
 import de.hdodenhof.circleimageview.CircleImageView
 
 class MainActivity : AppCompatActivity() {
 
-    private lateinit var profileNameText: TextView
+    // Use lateinit for views that are guaranteed to be in the layout
+    private lateinit var bottomNavView: BottomNavigationView
+    private lateinit var profileNameTextView: TextView
     private lateinit var profileImageView: CircleImageView
 
-    // Initialize the shared ViewModel using the activity-ktx delegate
-    private val profileViewModel: ProfileViewModel by viewModels()
+    // Firebase properties
+    private lateinit var auth: FirebaseAuth
+    private var currentUser: FirebaseUser? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        profileNameText = findViewById(R.id.text_profile_name)
+        // Initialize Firebase Auth
+        auth = FirebaseAuth.getInstance()
+        currentUser = auth.currentUser
+
+        // Initialize Views
+        bottomNavView = findViewById(R.id.bottom_navigation_view)
+        profileNameTextView = findViewById(R.id.text_profile_name)
         profileImageView = findViewById(R.id.image_profile_picture)
 
-        // --- OBSERVE LIVE DATA ---
-        // This block will execute whenever the username in the ViewModel changes
-        profileViewModel.username.observe(this) { newName ->
-            profileNameText.text = newName
-        }
+        // --- FIX 1: Set up the user profile info ---
+        // If currentUser is null, this will prevent a crash by providing default text.
+        profileNameTextView.text = currentUser?.displayName ?: "Guest"
+        // You can add a placeholder for the image here if you use a library like Glide/Picasso
+        // profileImageView.setImageResource(R.drawable.ic_profile_placeholder)
 
-        // This block will execute whenever the profile image URI in the ViewModel changes
-        profileViewModel.profileImageUri.observe(this) { newUri ->
-            if (newUri != null) {
-                profileImageView.setImageURI(newUri)
-            } else {
-                // If the URI is null (e.g., no picture set), show the placeholder
-                profileImageView.setImageResource(R.drawable.ic_profile_placeholder)
+        // Set up the listener for bottom navigation
+        bottomNavView.setOnItemSelectedListener { menuItem ->
+            when (menuItem.itemId) {
+                R.id.nav_home -> {
+                    replaceFragment(HomeFragment())
+                    true
+                }
+                R.id.nav_analytics -> {
+                    replaceFragment(AnalyticsFragment())
+                    true
+                }
+                R.id.nav_timer -> {
+                    replaceFragment(TimerFragment())
+                    true
+                }
+                R.id.nav_timetable -> {
+                    replaceFragment(TimetableFragment())
+                    true
+                }
+                R.id.nav_settings -> {
+                    replaceFragment(SettingsFragment())
+                    true
+                }
+                else -> false
             }
         }
-        // --- END OF OBSERVE ---
 
-        val bottomNavView: BottomNavigationView = findViewById(R.id.bottom_navigation_view)
-
-        // The listener for item clicks remains unchanged
-        bottomNavView.setOnItemSelectedListener { item ->
-            var selectedFragment: Fragment? = null
-            when (item.itemId) {
-                R.id.nav_home -> selectedFragment = HomeFragment()
-                R.id.nav_analytics -> selectedFragment = AnalyticsFragment()
-                R.id.nav_timetable -> selectedFragment = TimetableFragment()
-                R.id.nav_timer -> selectedFragment = TimerFragment()
-                R.id.nav_settings -> selectedFragment = SettingsFragment()
-            }
-
-            if (selectedFragment != null) {
-                supportFragmentManager.beginTransaction()
-                    .replace(R.id.nav_host_fragment, selectedFragment)
-                    .commit()
-            }
-            true
-        }
-
-        // Set the default screen to be displayed when the app starts
+        // --- FIX 2: Set the initial fragment ---
+        // This ensures the app starts on the home screen when MainActivity loads.
+        // It's safer to check if savedInstanceState is null to avoid re-adding the fragment on rotation.
         if (savedInstanceState == null) {
             bottomNavView.selectedItemId = R.id.nav_home
         }
+    }
+
+    private fun replaceFragment(fragment: Fragment) {
+        // --- FIX 3: Use the CORRECT FrameLayout ID from your activity_main.xml ---
+        val transaction = supportFragmentManager.beginTransaction()
+        transaction.replace(R.id.main_fragment_container, fragment) // Changed from nav_host_fragment
+        transaction.commit()
     }
 }

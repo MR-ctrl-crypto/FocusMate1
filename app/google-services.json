@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "819076980283",
+    "project_id": "focusmate-51ac3",
+    "storage_bucket": "focusmate-51ac3.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:819076980283:android:9c68ce0074517feeb5461e",
+        "android_client_info": {
+          "package_name": "com.example.focusmate"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC-2FO8D7EIbpLKgQn9PxRv-ZqeoJxaXYc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

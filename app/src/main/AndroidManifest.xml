@@ -16,14 +16,20 @@
         android:theme="@style/Theme.FocusMate"
         tools:targetApi="31">
 
-        <!-- THIS IS NOW THE ONE AND ONLY LAUNCHER ACTIVITY -->
+        <!-- This is now the LAUNCHER activity -->
         <activity
-            android:name=".MainActivity"
+            android:name=".AuthActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+        </activity>
+
+        <!-- THIS IS NOW THE ONE AND ONLY LAUNCHER ACTIVITY -->
+        <activity
+            android:name=".MainActivity"
+            android:exported="false">
         </activity>
 
         <!-- SETTINGS ACTIVITY IS NO LONGER A LAUNCHER -->

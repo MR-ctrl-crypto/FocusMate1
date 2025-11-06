@@ -1,7 +1,8 @@
 plugins {
-    alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    id("com.android.application")
+    id("com.google.gms.google-services")
 }
 
 android {
@@ -60,6 +61,12 @@ dependencies {
     implementation("de.hdodenhof:circleimageview:3.1.0")
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.8.3")
     implementation("androidx.activity:activity-ktx:1.9.0") // For the viewModels delegate
+    implementation(platform(libs.androidx.firebase.bom))
+    implementation(platform("com.google.firebase:firebase-bom:34.5.0"))
+    implementation("com.google.firebase:firebase-analytics")
+    implementation("com.google.firebase:firebase-auth")
+    implementation("androidx.compose.material:material-icons-extended")
+
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
