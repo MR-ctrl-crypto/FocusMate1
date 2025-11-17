@@ -1,21 +1,60 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Base application theme. -->
-    <style name="Base.Theme.FocusMate" parent="Theme.Material3.DayNight.NoActionBar"> <!-- MUST BE .NoActionBar -->
-        <!-- Customize your light theme here. -->
+
+    <!-- Base Application Theme -->
+    <style name="Base.Theme.FocusMate" parent="Theme.Material3.DayNight.NoActionBar">
+
+        <!-- Primary Branding -->
+        <item name="colorPrimary">@color/primary_blue</item>
+        <item name="colorPrimaryContainer">@color/primary_blue_dark</item>
+
+        <!-- Secondary (Pause) -->
+        <item name="colorSecondary">@color/pause_green</item>
+        <item name="colorSecondaryContainer">@color/pause_green</item>
+
+        <!-- Error (Stop) -->
+        <item name="colorError">@color/stop_red</item>
+
+        <!-- Background / Surface -->
+        <item name="android:colorBackground">@color/background_light</item>
+        <item name="colorSurface">@color/surface_white</item>
+        <item name="colorOnSurface">@color/text_primary</item>
+        <item name="colorOnBackground">@color/text_primary</item>
+
+        <!-- Text Colors -->
+        <item name="android:textColorPrimary">@color/text_primary</item>
+        <item name="android:textColorSecondary">@color/text_secondary</item>
+
+        <!-- Material Component Colors -->
+        <item name="colorOutline">@color/divider_gray</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@color/surface_white</item>
+
+        <!-- Switch / Toggle -->
+        <item name="colorControlNormal">@color/switch_track_off</item>
+        <item name="colorControlActivated">@color/primary_blue</item>
+
     </style>
 
     <style name="Theme.FocusMate" parent="Base.Theme.FocusMate" />
-    <!-- STYLES FOR THE CALENDAR VIEW -->
+
+    <!-- Calendar View Style -->
     <style name="CalenderViewCustom" parent="Theme.AppCompat">
-        <item name="colorAccent">?attr/colorPrimary</item>
+        <item name="colorAccent">@color/primary_blue</item>
         <item name="android:windowIsTranslucent">true</item>
     </style>
 
     <style name="CalenderViewDateCustomText" parent="android:TextAppearance.DeviceDefault.Small">
-        <item name="android:textColor">?attr/colorOnSurface</item>
+        <item name="android:textColor">@color/text_primary</item>
     </style>
 
     <style name="CalenderViewWeekCustomText" parent="android:TextAppearance.DeviceDefault.Small">
-        <item name="android:textColor">?android:attr/textColorSecondary</item>
+        <item name="android:textColor">@color/text_secondary</item>
     </style>
+
+    <!-- NumberPicker Styling -->
+    <style name="AppTheme.NumberPicker" parent="Theme.AppCompat.Light">
+        <item name="android:textColorPrimary">@color/primary_blue</item>
+        <item name="android:colorControlNormal">@color/primary_blue_dark</item>
+    </style>
+
 </resources>

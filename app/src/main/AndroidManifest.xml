@@ -4,6 +4,10 @@
 
     <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES"
         tools:ignore="QueryAllPackagesPermission" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
+
 
     <application
         android:allowBackup="true"
@@ -47,17 +51,12 @@
             android:label="Manage Account">
         </activity>
 
+        <service
+            android:name=".TimerService"
+            android:enabled="true"
+            android:exported="false"
+            android:foregroundServiceType="dataSync"/>
 
-<!--Deprecated-->
-<!--        <activity-->
-<!--            android:name=".BlockedAppsActivity"-->
-<!--            android:exported="false"-->
-<!--            android:label="Select Apps to Block"-->
-<!--            android:parentActivityName=".SettingsActivity">-->
-<!--            <meta-data-->
-<!--                android:name="android.support.PARENT_ACTIVITY"-->
-<!--                android:value=".SettingsActivity" />-->
-<!--        </activity>-->
 
     </application>
 </manifest>

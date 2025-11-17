@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+
+    <!-- 🔵 YOUR ORIGINAL COLORS (UNCHANGED) -->
     <color name="purple_200">#FFBB86FC</color>
     <color name="purple_500">#FF6200EE</color>
     <color name="purple_700">#FF3700B3</color>
@@ -7,8 +9,40 @@
     <color name="teal_700">#FF018786</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
-    <color name="accent_blue">#007AFF</color> <!-- iOS-style blue -->
-    <color name="accent_blue_light">#EBF5FF</color> <!-- A light variant for the timer circle -->
+    <color name="accent_blue">#007AFF</color> <!-- iOS blue -->
+    <color name="accent_blue_light">#EBF5FF</color> <!-- light variant -->
     <color name="red">#FF008AFF</color>
-</resources>
 
+    <!-- ⭐ NEW COLORS ADDED (MATCHING THE UI YOU SENT) -->
+
+    <!-- Primary App Blue (Start button, highlights) -->
+    <color name="primary_blue">#2196F3</color>
+    <color name="primary_blue_dark">#1976D2</color>
+
+    <!-- Pause Button -->
+    <color name="pause_green">#8BC34A</color>
+
+    <!-- Stop Button -->
+    <color name="stop_red">#F44336</color>
+
+    <!-- Backgrounds -->
+    <color name="background_light">#F9F9F9</color>
+    <color name="surface_white">#FFFFFF</color>
+    <color name="surface_gray">#F2F2F2</color>
+
+    <!-- Text -->
+    <color name="text_primary">#212121</color>
+    <color name="text_secondary">#757575</color>
+
+    <!-- Divider -->
+    <color name="divider_gray">#E0E0E0</color>
+
+    <!-- Switch / Toggle -->
+    <color name="switch_track_off">#BDBDBD</color>
+    <color name="switch_thumb_off">#E0E0E0</color>
+
+    <!-- Timer Circle -->
+    <color name="timer_circle_light">#E8EEF3</color>
+    <color name="timer_text_light">#9E9E9E</color>
+
+</resources>
