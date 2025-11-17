@@ -13,7 +13,6 @@ import androidx.preference.PreferenceFragmentCompat
 
 class SettingsFragment : PreferenceFragmentCompat() {
 
-    // ... (Your existing code for viewModel, prefs, and pickImageLauncher remains here)
     private val profileViewModel: ProfileViewModel by activityViewModels()
     private lateinit var prefs: SharedPreferences
     private val pickImageLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
@@ -33,7 +32,6 @@ class SettingsFragment : PreferenceFragmentCompat() {
 
         prefs = preferenceManager.sharedPreferences!!
 
-        // --- All your existing preference listeners for username, profile picture, and manage account remain here ---
         val usernamePreference: EditTextPreference? = findPreference("username")
         usernamePreference?.summaryProvider = Preference.SummaryProvider<EditTextPreference> { preference ->
             val text = preference.text
@@ -54,36 +52,35 @@ class SettingsFragment : PreferenceFragmentCompat() {
             true
         }
 
+        // ======================= FIX #1: MANAGE ACCOUNT =======================
         val manageAccountPreference: Preference? = findPreference("manage_account")
         manageAccountPreference?.setOnPreferenceClickListener {
             val manageAccountFragment = ManageAccountFragment()
             parentFragmentManager.beginTransaction()
-                .replace(R.id.nav_host_fragment, manageAccountFragment)
+                // Use the CORRECT container ID from MainActivity's layout
+                .replace(R.id.main_fragment_container, manageAccountFragment)
                 .addToBackStack(null)
                 .commit()
             true
         }
 
-        // ======================= NEW CODE FOR BLOCKED APPS =======================
+        // ======================= FIX #2: BLOCKED APPS =======================
         val blockedAppsPreference: Preference? = findPreference("blocked_apps")
         blockedAppsPreference?.setOnPreferenceClickListener {
-            // Create an instance of the new fragment
             val blockedAppsFragment = BlockedAppsFragment()
-
-            // Use the FragmentManager to replace the current fragment with the new one
             parentFragmentManager.beginTransaction()
-                .replace(R.id.nav_host_fragment, blockedAppsFragment)
-                .addToBackStack(null) // Allows the user to press back to return to settings
+                // Use the CORRECT container ID here as well
+                .replace(R.id.main_fragment_container, blockedAppsFragment)
+                .addToBackStack(null)
                 .commit()
 
-            true // Return true to indicate the click was handled
+            true
         }
-        // ======================= END OF NEW CODE =======================
+        // ======================= END OF FIXES =======================
 
         loadInitialProfileData()
     }
 
-    // ... (Your loadInitialProfileData and takeUriPermission functions remain here)
     private fun loadInitialProfileData() {
         val savedUsername = prefs.getString("username", "User") ?: "User"
         profileViewModel.updateUsername(savedUsername)
