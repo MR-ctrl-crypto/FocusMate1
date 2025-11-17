@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
 import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController // <-- IMPORTANT: Import NavController
 import com.github.mikephil.charting.charts.PieChart
 import com.github.mikephil.charting.data.PieData
 import com.github.mikephil.charting.data.PieDataSet
@@ -31,7 +32,6 @@ class HomeFragment : Fragment() {
         return inflater.inflate(R.layout.fragment_home, container, false)
     }
 
-    // in HomeFragment.kt
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -91,12 +91,13 @@ class HomeFragment : Fragment() {
 
         // Get the primary color from the current theme attribute
         val typedValue = android.util.TypedValue()
-        requireContext().theme.resolveAttribute(com.google.android.material.R.attr.colorPrimary, typedValue, true)
+        // CORRECTED TYPO: It should be R.attr, not com.google.android.material.R.attr
+        requireContext().theme.resolveAttribute(android.R.attr.colorPrimary, typedValue, true)
         val primaryColor = typedValue.data
 
         val colors = ArrayList<Int>().apply {
             // Use the theme color we just resolved
-            add(primaryColor) // Blue accent from your theme
+            add(primaryColor)
             add(Color.parseColor("#E0E0E0")) // Light gray
         }
 
@@ -120,21 +121,17 @@ class HomeFragment : Fragment() {
         motivationalQuoteText.text = quotes.random()
     }
 
+    // ======================= CORRECTED NAVIGATION LOGIC =======================
     private fun setupClickListeners() {
         startSessionButton.setOnClickListener {
-            // Navigate to the TimerFragment
-            parentFragmentManager.beginTransaction()
-                .replace(R.id.nav_host_fragment, TimerFragment())
-                .addToBackStack(null)
-                .commit()
+            // Navigate to the TimerFragment using the action from nav_graph.xml
+            findNavController().navigate(R.id.action_homeFragment_to_timerFragment)
         }
 
         viewTimetableCard.setOnClickListener {
-            // Navigate to the TimetableFragment
-            parentFragmentManager.beginTransaction()
-                .replace(R.id.nav_host_fragment, TimetableFragment())
-                .addToBackStack(null)
-                .commit()
+            // Navigate to the TimetableFragment using the action from nav_graph.xml
+            findNavController().navigate(R.id.action_homeFragment_to_timetableFragment)
         }
     }
+    // ======================= END OF CORRECTIONS =======================
 }
