@@ -12,6 +12,7 @@ import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.firebase.auth.FirebaseAuth
 import com.squareup.picasso.Picasso
 import de.hdodenhof.circleimageview.CircleImageView
+import androidx.recyclerview.widget.RecyclerView // Add this import
 
 class MainActivity : AppCompatActivity() {
 

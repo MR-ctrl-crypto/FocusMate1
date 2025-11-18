@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- This is the main blue background color -->
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="#028CFF"/>
+        </shape>
+    </item>
+
+    <!-- This creates the curve at the bottom -->
+    <item>
+        <shape android:shape="rectangle">
+            <!-- This color should match your app's main background color -->
+            <solid android:color="?android:attr/colorBackground"/>
+            <!-- Adjust the radius for a deeper or shallower curve -->
+            <corners android:topLeftRadius="40dp" android:topRightRadius="40dp"/>
+        </shape>
+        <!-- The top margin "pushes" this shape down, revealing the blue behind it -->
+        <margin android:top="250dp"/>
+    </item>
+</layer-list>

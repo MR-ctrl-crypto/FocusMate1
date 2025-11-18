@@ -8,10 +8,13 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.ImageButton
+import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.card.MaterialCardView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
@@ -23,12 +26,19 @@ import java.util.concurrent.TimeUnit
 
 class HomeFragment : Fragment() {
 
+    // --- Views ---
     private lateinit var totalFocusTimeText: TextView
     private lateinit var focusStreakText: TextView
     private lateinit var motivationalQuoteText: TextView
     private lateinit var startSessionButton: Button
     private lateinit var viewTimetableCard: MaterialCardView
-    private lateinit var viewBlockedAppsCard: MaterialCardView // <-- ADDED THIS
+    private lateinit var viewBlockedAppsCard: MaterialCardView
+
+    // --- Sound Player Views & Manager ---
+    private lateinit var soundsRecyclerView: RecyclerView
+    private lateinit var pauseSoundButton: ImageButton
+    private lateinit var soundProgressBar: ProgressBar // Will now be used as a simple indicator
+    private lateinit var soundManager: SoundManager
 
     private val databaseUrl = "https://focusmate-51ac3-default-rtdb.europe-west1.firebasedatabase.app"
 
@@ -36,29 +46,85 @@ class HomeFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
+        soundManager = SoundManager(requireContext())
         return inflater.inflate(R.layout.fragment_home, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // Initialize all the views from the layout
+        // --- Initialize Views ---
         totalFocusTimeText = view.findViewById(R.id.text_total_focus_time)
         focusStreakText = view.findViewById(R.id.text_focus_streak)
         motivationalQuoteText = view.findViewById(R.id.text_motivational_quote)
         startSessionButton = view.findViewById(R.id.button_start_new_session)
         viewTimetableCard = view.findViewById(R.id.card_view_timetable)
-        viewBlockedAppsCard = view.findViewById(R.id.card_view_blocked_apps) // <-- ADDED THIS
+        viewBlockedAppsCard = view.findViewById(R.id.card_view_blocked_apps)
+        soundsRecyclerView = view.findViewById(R.id.sounds_recycler_view)
+        pauseSoundButton = view.findViewById(R.id.button_pause_sound)
+        soundProgressBar = view.findViewById(R.id.sound_progress_bar)
 
+        // --- Setup ---
         loadMotivationalQuote()
-        setupClickListeners() // Setup navigation listeners
+        setupClickListeners()
+        setupSoundsRecyclerView()
+        updateSoundUi() // Update UI based on manager's state
     }
 
     override fun onResume() {
         super.onResume()
         loadFocusDataFromFirebase()
+        updateSoundUi() // Refresh UI when returning to the fragment
     }
 
+    // REMOVED onPause() - we no longer want to stop the sound when leaving the fragment.
+
+    private fun setupSoundsRecyclerView() {
+        val soundList = listOf(
+            Sound("Rain", R.raw.rain, R.drawable.ic_rain),
+            Sound("Forest", R.raw.forest, R.drawable.ic_forest)
+        )
+        val soundAdapter = SoundAdapter(soundList) { sound ->
+            soundManager.playSound(sound.resourceId)
+            updateSoundUi() // Immediately update UI after a click
+        }
+        soundsRecyclerView.adapter = soundAdapter
+    }
+
+    private fun updateSoundUi() {
+        val isPlaying = soundManager.isPlaying
+        val visibility = if (isPlaying) View.VISIBLE else View.GONE
+        pauseSoundButton.visibility = visibility
+        // The progress bar can now just be an indeterminate indicator if you want
+        soundProgressBar.visibility = visibility
+        soundProgressBar.isIndeterminate = isPlaying // Shows a continuous animation
+    }
+
+    private fun setupClickListeners() {
+        startSessionButton.setOnClickListener {
+            findNavController().navigate(R.id.action_homeFragment_to_timerFragment)
+        }
+
+        viewTimetableCard.setOnClickListener {
+            findNavController().navigate(R.id.action_homeFragment_to_timetableFragment)
+        }
+
+        viewBlockedAppsCard.setOnClickListener {
+            if (!isNotificationServiceEnabled()) {
+                showPermissionDialog()
+            } else {
+                findNavController().navigate(R.id.action_homeFragment_to_blockedAppsFragment)
+            }
+        }
+
+        pauseSoundButton.setOnClickListener {
+            soundManager.stopSound()
+            updateSoundUi() // Immediately update UI after a click
+        }
+    }
+
+    // --- All other functions (loadFocusData, etc.) remain unchanged ---
+    // ... (paste your existing loadFocusDataFromFirebase, calculateFocusStreak, etc. here)
     private fun loadFocusDataFromFirebase() {
         val userId = FirebaseAuth.getInstance().currentUser?.uid
         if (userId == null) {
@@ -87,29 +153,30 @@ class HomeFragment : Fragment() {
     }
 
     private fun calculateFocusStreak(sessions: List<FocusSession>): Int {
-        if (sessions.isEmpty()) {
-            return 0
-        }
+        if (sessions.isEmpty()) return 0
+
         val uniqueDays = sessions
             .map { session ->
-                val cal = Calendar.getInstance().apply { timeInMillis = session.endTimestamp }
-                cal.set(Calendar.HOUR_OF_DAY, 0)
-                cal.set(Calendar.MINUTE, 0)
-                cal.set(Calendar.SECOND, 0)
-                cal.set(Calendar.MILLISECOND, 0)
-                cal.timeInMillis
+                Calendar.getInstance().apply {
+                    timeInMillis = session.endTimestamp
+                    set(Calendar.HOUR_OF_DAY, 0)
+                    set(Calendar.MINUTE, 0)
+                    set(Calendar.SECOND, 0)
+                    set(Calendar.MILLISECOND, 0)
+                }.timeInMillis
             }
             .toSet()
             .sortedDescending()
 
         var streak = 0
-        val today = Calendar.getInstance()
-        today.set(Calendar.HOUR_OF_DAY, 0)
-        today.set(Calendar.MINUTE, 0)
-        today.set(Calendar.SECOND, 0)
-        today.set(Calendar.MILLISECOND, 0)
+        val today = Calendar.getInstance().apply {
+            set(Calendar.HOUR_OF_DAY, 0)
+            set(Calendar.MINUTE, 0)
+            set(Calendar.SECOND, 0)
+            set(Calendar.MILLISECOND, 0)
+        }
 
-        if (uniqueDays.first() >= today.timeInMillis || uniqueDays.first() >= today.timeInMillis - TimeUnit.DAYS.toMillis(1)) {
+        if (uniqueDays.first() >= today.timeInMillis - TimeUnit.DAYS.toMillis(1)) {
             streak = 1
             var lastDay = uniqueDays.first()
             for (i in 1 until uniqueDays.size) {
@@ -136,29 +203,6 @@ class HomeFragment : Fragment() {
         motivationalQuoteText.text = quotes.random()
     }
 
-    private fun setupClickListeners() {
-        startSessionButton.setOnClickListener {
-            findNavController().navigate(R.id.action_homeFragment_to_timerFragment)
-        }
-
-        viewTimetableCard.setOnClickListener {
-            findNavController().navigate(R.id.action_homeFragment_to_timetableFragment)
-        }
-
-        // --- NEW CLICK LISTENER FOR BLOCKED APPS ---
-        viewBlockedAppsCard.setOnClickListener {
-            // Check for notification permission first
-            if (!isNotificationServiceEnabled()) {
-                // Guide user to settings if permission is not granted
-                showPermissionDialog()
-            } else {
-                // If permission is granted, navigate to the fragment
-                findNavController().navigate(R.id.action_homeFragment_to_blockedAppsFragment)
-            }
-        }
-    }
-
-    // --- NEW HELPER FUNCTIONS FOR PERMISSION ---
     private fun isNotificationServiceEnabled(): Boolean {
         val enabledListeners = Settings.Secure.getString(requireContext().contentResolver, "enabled_notification_listeners")
         return enabledListeners?.contains(requireContext().packageName) == true
@@ -175,3 +219,4 @@ class HomeFragment : Fragment() {
             .show()
     }
 }
+

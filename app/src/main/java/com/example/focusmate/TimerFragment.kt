@@ -40,8 +40,7 @@ class TimerFragment : Fragment() {
     private lateinit var startButton: Button
     private lateinit var stopButton: Button
     private lateinit var editTimerButton: ImageButton
-    private lateinit var silenceNotificationsSwitch: SwitchMaterial
-    private lateinit var blockSocialMediaSwitch: SwitchMaterial
+
     private lateinit var badgePrefs: SharedPreferences
     private lateinit var badgesContainer: LinearLayout
 
@@ -51,7 +50,6 @@ class TimerFragment : Fragment() {
         Badge("Focus Pro", 120, R.drawable.ic_badge_placeholder),
         Badge("Time Keeper", 300, R.drawable.ic_badge_placeholder),
         Badge("Focus Master", 600, R.drawable.ic_badge_placeholder),
-        Badge("Streak Pro", -1, R.drawable.ic_badge_placeholder)
     )
 
     private val timerUpdateReceiver = object : BroadcastReceiver() {
