@@ -10,6 +10,7 @@ activityCompose = "1.11.0"
 composeBom = "2024.09.00"
 navigationFragment = "2.9.5"
 firebaseBom = "33.1.2"
+material = "1.12.0" # <-- ADD THIS LINE
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -29,6 +30,7 @@ androidx-material3 = { group = "androidx.compose.material3", name = "material3" 
 androidx-navigation-fragment = { group = "androidx.navigation", name = "navigation-fragment", version.ref = "navigationFragment" }
 androidx-firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebaseBom" }
 firebase-ktx = { group = "com.google.firebase", name = "firebase-ktx" }
+material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 
 
 [plugins]

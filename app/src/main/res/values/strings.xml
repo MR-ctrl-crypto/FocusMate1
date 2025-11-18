@@ -1,3 +1,8 @@
 <resources>
     <string name="app_name">FocusMate</string>
+    <string name="home">Home</string>
+    <string name="timer">Timer</string>
+    <string name="timetable">Timetable</string>
+    <string name="analytics">Analytics</string>
+    <string name="settings">Settings</string>
 </resources>

@@ -15,13 +15,15 @@ import android.widget.Button
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.LinearLayout
-import android.widget.NumberPicker // <-- NEW IMPORT
+import android.widget.NumberPicker
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.google.android.material.switchmaterial.SwitchMaterial
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.FirebaseDatabase
 
 class TimerFragment : Fragment() {
 
@@ -65,8 +67,7 @@ class TimerFragment : Fragment() {
                     isTimerRunning = false
                     timerLabel.text = "Session Complete!"
                     timeLeftInMillis = startTimeInMillis
-                    saveProgress(startTimeInMillis)
-                    updateBadgesUI()
+                    saveProgress(startTimeInMillis) // Save the full session duration on finish
                     updateButtons()
                     updateTimerText()
                 }
@@ -142,26 +143,19 @@ class TimerFragment : Fragment() {
         updateTimerText()
     }
 
-    // ======================= MODIFIED FUNCTION =======================
     private fun showEditTimerDialog() {
         val dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_edit_timer, null)
         val hoursPicker = dialogView.findViewById<NumberPicker>(R.id.picker_hours)
         val minutesPicker = dialogView.findViewById<NumberPicker>(R.id.picker_minutes)
         val secondsPicker = dialogView.findViewById<NumberPicker>(R.id.picker_seconds)
 
-        // Configure Hours Picker
         hoursPicker.minValue = 0
         hoursPicker.maxValue = 23
-
-        // Configure Minutes Picker
         minutesPicker.minValue = 0
         minutesPicker.maxValue = 59
-
-        // Configure Seconds Picker
         secondsPicker.minValue = 0
         secondsPicker.maxValue = 59
 
-        // Set current values
         val currentHours = (startTimeInMillis / (1000 * 60 * 60)) % 24
         val currentMinutes = (startTimeInMillis / (1000 * 60)) % 60
         val currentSeconds = (startTimeInMillis / 1000) % 60
@@ -176,23 +170,17 @@ class TimerFragment : Fragment() {
                 val hours = hoursPicker.value
                 val minutes = minutesPicker.value
                 val seconds = secondsPicker.value
-
-                // Calculate total time in milliseconds
                 val totalMillis = (hours * 3600 + minutes * 60 + seconds) * 1000L
 
-                // A small validation to ensure the timer is not set to 0
                 if (totalMillis > 0) {
                     startTimeInMillis = totalMillis
-                    stopTimer() // Use stopTimer() to properly reset the UI and state to the new time
+                    stopTimer()
                 } else {
                     Toast.makeText(context, "Please set a time greater than 0 seconds.", Toast.LENGTH_SHORT).show()
                 }
-
                 dialog.dismiss()
             }
-            .setNegativeButton("Cancel") { dialog, _ ->
-                dialog.cancel()
-            }
+            .setNegativeButton("Cancel", null)
             .create()
             .show()
     }
@@ -209,9 +197,8 @@ class TimerFragment : Fragment() {
 
     private fun stopTimer() {
         val timeFocused = startTimeInMillis - timeLeftInMillis
-        if (timeFocused > 5000 && isTimerRunning) {
+        if (timeFocused > 1000 && isTimerRunning) { // Save progress if focused for more than 1 sec
             saveProgress(timeFocused)
-            updateBadgesUI()
         }
 
         val intent = Intent(requireContext(), TimerService::class.java).apply {
@@ -227,13 +214,40 @@ class TimerFragment : Fragment() {
     }
 
     private fun saveProgress(focusedMillis: Long) {
-        val totalMinutesFocused = badgePrefs.getLong("totalMinutesFocused", 0)
-        val newMinutes = focusedMillis / 1000 / 60
-        if (newMinutes > 0) {
-            val newTotal = totalMinutesFocused + newMinutes
-            badgePrefs.edit().putLong("totalMinutesFocused", newTotal).apply()
-            Toast.makeText(context, "Saved $newMinutes minute(s) of focus!", Toast.LENGTH_SHORT).show()
+        val minutes = focusedMillis / 1000 / 60
+        if (minutes <= 0) return
+
+        val userId = FirebaseAuth.getInstance().currentUser?.uid
+        if (userId == null) {
+            Toast.makeText(context, "You must be logged in to save progress.", Toast.LENGTH_SHORT).show()
+            return
         }
+
+        // --- THIS IS THE CRITICAL FIX ---
+        // Specify the correct database URL when getting the instance.
+        val databaseUrl = "https://focusmate-51ac3-default-rtdb.europe-west1.firebasedatabase.app"
+        val database = FirebaseDatabase.getInstance(databaseUrl).getReference("sessions").child(userId)
+        // --------------------------------
+
+        val session = FocusSession(
+            durationMinutes = minutes,
+            endTimestamp = System.currentTimeMillis()
+        )
+
+        database.push().setValue(session)
+            .addOnSuccessListener {
+                Toast.makeText(context, "Saved $minutes minute(s) of focus!", Toast.LENGTH_SHORT).show()
+            }
+            .addOnFailureListener { e ->
+                // Show a detailed error message to help with debugging
+                Toast.makeText(context, "Failed to save session: ${e.message}", Toast.LENGTH_LONG).show()
+            }
+
+        // Update local badges
+        val totalMinutesFocused = badgePrefs.getLong("totalMinutesFocused", 0)
+        val newTotal = totalMinutesFocused + minutes
+        badgePrefs.edit().putLong("totalMinutesFocused", newTotal).apply()
+        updateBadgesUI() // Refresh badges after saving
     }
 
     private fun updateBadgesUI() {
@@ -261,13 +275,11 @@ class TimerFragment : Fragment() {
         }
     }
 
-    // ======================= MODIFIED FUNCTION =======================
     private fun updateTimerText() {
         val hours = (timeLeftInMillis / (1000 * 60 * 60)) % 24
         val minutes = (timeLeftInMillis / (1000 * 60)) % 60
         val seconds = (timeLeftInMillis / 1000) % 60
 
-        // Only show hours if the total time is an hour or more
         val timeFormatted = if (startTimeInMillis >= 3600000) {
             String.format("%d:%02d:%02d", hours, minutes, seconds)
         } else {
@@ -277,12 +289,7 @@ class TimerFragment : Fragment() {
     }
 
     private fun updateButtons() {
-        if (isTimerRunning) {
-            startButton.visibility = View.INVISIBLE
-            stopButton.visibility = View.VISIBLE
-        } else {
-            startButton.visibility = View.VISIBLE
-            stopButton.visibility = View.INVISIBLE
-        }
+        startButton.visibility = if (isTimerRunning) View.INVISIBLE else View.VISIBLE
+        stopButton.visibility = if (isTimerRunning) View.VISIBLE else View.INVISIBLE
     }
 }

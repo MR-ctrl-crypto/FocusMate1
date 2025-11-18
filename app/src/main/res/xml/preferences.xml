@@ -11,13 +11,7 @@
         <Preference
             app:key="manage_account"
             app:title="Manage Account"
-            app:summary="Update your profile or change password" />
-
-        <SwitchPreference
-            app:key="cloud_sync"
-            app:title="Cloud Sync"
-            app:summary="Sync your settings across devices"
-            app:defaultValue="false" />
+            app:summary="Update your profile" />
 
     </PreferenceCategory>
 
@@ -28,31 +22,23 @@
             app:title="Enable Notifications"
             app:defaultValue="true" />
 
+
+
+    </PreferenceCategory>
+
+    <PreferenceCategory app:title="Appearance">
+
         <ListPreference
             app:key="theme_preference"
             app:title="Theme"
             app:summary="%s"
+            app:defaultValue="system"
             app:entries="@array/theme_entries"
-            app:entryValues="@array/theme_values"
-            app:defaultValue="auto" />
+            app:entryValues="@array/theme_values" />
 
     </PreferenceCategory>
 
-    <!-- ======================= CORRECTED SECTION ======================= -->
-    <!-- This section is now a single, simple Preference that will act as a button. -->
-    <PreferenceCategory app:title="Focus Settings">
 
-        <Preference
-            app:key="blocked_apps"
-            app:title="Blocked Apps"
-            app:summary="Select which applications to block"
-            app:icon="@drawable/ic_block" />
-
-        <!-- The EditTextPreference has been removed. -->
-        <!-- Your SettingsFragment will now correctly launch BlockedAppsActivity -->
-        <!-- when this "blocked_apps" preference is clicked. -->
-
-    </PreferenceCategory>
     <!-- ===================== END OF CORRECTED SECTION ==================== -->
 
 </PreferenceScreen>

@@ -1,83 +1,99 @@
 package com.example.focusmate
 
 import android.os.Bundle
+import android.view.View
 import android.widget.TextView
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.fragment.app.Fragment
+import androidx.navigation.NavController
+import androidx.navigation.fragment.NavHostFragment
+import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.FirebaseUser
+import com.squareup.picasso.Picasso
 import de.hdodenhof.circleimageview.CircleImageView
 
 class MainActivity : AppCompatActivity() {
 
-    // Use lateinit for views that are guaranteed to be in the layout
-    private lateinit var bottomNavView: BottomNavigationView
-    private lateinit var profileNameTextView: TextView
-    private lateinit var profileImageView: CircleImageView
-
-    // Firebase properties
+    private lateinit var navController: NavController
     private lateinit var auth: FirebaseAuth
-    private var currentUser: FirebaseUser? = null
+
+    private lateinit var headerUsername: TextView
+    private lateinit var headerProfileImage: CircleImageView
+    private lateinit var bottomNav: BottomNavigationView
+
+    private val profileViewModel: ProfileViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        // --- THIS MUST BE THE VERY FIRST THING THAT HAPPENS ---
+        // Apply the saved theme BEFORE super.onCreate() is called.
+        // This ensures the Activity is created with the correct theme from the start.
+        val sharedPreferences = getSharedPreferences("com.example.focusmate_preferences", MODE_PRIVATE)
+        val themeValue = sharedPreferences.getString("theme_preference", ThemeManager.THEME_SYSTEM) ?: ThemeManager.THEME_SYSTEM
+        ThemeManager.applyTheme(themeValue)
+        // -----------------------------------------------------
+
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        // Initialize Firebase Auth
         auth = FirebaseAuth.getInstance()
-        currentUser = auth.currentUser
+        headerUsername = findViewById(R.id.text_header_username)
+        headerProfileImage = findViewById(R.id.image_header_profile)
+        bottomNav = findViewById(R.id.bottom_navigation)
 
-        // Initialize Views
-        bottomNavView = findViewById(R.id.bottom_navigation_view)
-        profileNameTextView = findViewById(R.id.text_profile_name)
-        profileImageView = findViewById(R.id.image_profile_picture)
+        val navHostFragment = supportFragmentManager
+            .findFragmentById(R.id.nav_host_fragment) as NavHostFragment
+        navController = navHostFragment.navController
 
-        // --- FIX 1: Set up the user profile info ---
-        // If currentUser is null, this will prevent a crash by providing default text.
-        profileNameTextView.text = currentUser?.displayName ?: "Guest"
-        // You can add a placeholder for the image here if you use a library like Glide/Picasso
-        // profileImageView.setImageResource(R.drawable.ic_profile_placeholder)
+        // THIS IS THE LINE THAT MAKES THE BUTTONS WORK.
+        // It automatically matches the menu item ID to the fragment ID in the graph.
+        bottomNav.setupWithNavController(navController)
 
-        // Set up the listener for bottom navigation
-        bottomNavView.setOnItemSelectedListener { menuItem ->
-            when (menuItem.itemId) {
-                R.id.nav_home -> {
-                    replaceFragment(HomeFragment())
-                    true
-                }
-                R.id.nav_analytics -> {
-                    replaceFragment(AnalyticsFragment())
-                    true
-                }
-                R.id.nav_timer -> {
-                    replaceFragment(TimerFragment())
-                    true
-                }
-                R.id.nav_timetable -> {
-                    replaceFragment(TimetableFragment())
-                    true
-                }
-                R.id.nav_settings -> {
-                    replaceFragment(SettingsFragment())
-                    true
-                }
-                else -> false
+        observeProfileData()
+
+        // This listener handles hiding and showing the bar.
+        navController.addOnDestinationChangedListener { _, destination, _ ->
+            // If the destination is part of the main app graph, show the UI.
+            if (destination.parent?.id == R.id.main_graph) {
+                headerUsername.visibility = View.VISIBLE
+                headerProfileImage.visibility = View.VISIBLE
+                bottomNav.visibility = View.VISIBLE
+            } else { // Otherwise (it's in the auth graph), hide the UI.
+                headerUsername.visibility = View.GONE
+                headerProfileImage.visibility = View.GONE
+                bottomNav.visibility = View.GONE
             }
-        }
-
-        // --- FIX 2: Set the initial fragment ---
-        // This ensures the app starts on the home screen when MainActivity loads.
-        // It's safer to check if savedInstanceState is null to avoid re-adding the fragment on rotation.
-        if (savedInstanceState == null) {
-            bottomNavView.selectedItemId = R.id.nav_home
         }
     }
 
-    private fun replaceFragment(fragment: Fragment) {
-        // --- FIX 3: Use the CORRECT FrameLayout ID from your activity_main.xml ---
-        val transaction = supportFragmentManager.beginTransaction()
-        transaction.replace(R.id.main_fragment_container, fragment) // Changed from nav_host_fragment
-        transaction.commit()
+    private fun observeProfileData() {
+        profileViewModel.username.observe(this) { name ->
+            headerUsername.text = name ?: "User"
+        }
+        profileViewModel.profileImageUri.observe(this) { uri ->
+            if (uri != null) {
+                Picasso.get().load(uri)
+                    .placeholder(R.drawable.ic_profile_placeholder)
+                    .error(R.drawable.ic_profile_placeholder)
+                    .into(headerProfileImage)
+            } else {
+                headerProfileImage.setImageResource(R.drawable.ic_profile_placeholder)
+            }
+        }
+    }
+
+    override fun onStart() {
+        super.onStart()
+        // This logic correctly directs the user based on login state.
+        if (auth.currentUser == null) {
+            if (navController.currentDestination?.parent?.id != R.id.auth_graph) {
+                navController.navigate(R.id.auth_graph)
+            }
+        } else {
+            profileViewModel.fetchUserProfile()
+            if (navController.currentDestination?.parent?.id == R.id.auth_graph) {
+                navController.navigate(R.id.action_global_main_graph)
+            }
+        }
     }
 }

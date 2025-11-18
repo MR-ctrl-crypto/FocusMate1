@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main_graph"
+    app:startDestination="@id/homeFragment">
+
+    <fragment
+        android:id="@+id/homeFragment"
+        android:name="com.example.focusmate.HomeFragment"
+        android:label="fragment_home"
+        tools:layout="@layout/fragment_home" >
+        <action
+            android:id="@+id/action_homeFragment_to_timerFragment"
+            app:destination="@id/timerFragment" />
+        <action
+            android:id="@+id/action_homeFragment_to_timetableFragment"
+            app:destination="@id/timetableFragment" />
+
+        <action
+            android:id="@+id/action_homeFragment_to_blockedAppsFragment"
+            app:destination="@id/blockedAppsFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/timerFragment"
+        android:name="com.example.focusmate.TimerFragment"
+        android:label="fragment_timer"
+        tools:layout="@layout/fragment_timer" />
+
+    <fragment
+        android:id="@+id/timetableFragment"
+        android:name="com.example.focusmate.TimetableFragment"
+        android:label="fragment_timetable"
+        tools:layout="@layout/fragment_timetable" />
+
+    <fragment
+        android:id="@+id/analyticsFragment"
+        android:name="com.example.focusmate.AnalyticsFragment"
+        android:label="fragment_analytics"
+        tools:layout="@layout/fragment_analytics" />
+
+    <fragment
+        android:id="@+id/settingsFragment"
+        android:name="com.example.focusmate.SettingsFragment"
+        android:label="fragment_settings"
+        tools:layout="@xml/preferences" >
+
+        <!-- Action for Manage Account -->
+        <action
+            android:id="@+id/action_settingsFragment_to_manageAccountFragment"
+            app:destination="@id/manageAccountFragment" />
+
+
+    </fragment>
+
+    <fragment
+        android:id="@+id/manageAccountFragment"
+        android:name="com.example.focusmate.ManageAccountFragment"
+        android:label="fragment_manage_account"
+        tools:layout="@layout/fragment_manage_account" />
+
+    <!-- THIS IS THE NEW DESTINATION FOR BLOCKED APPS -->
+    <fragment
+        android:id="@+id/blockedAppsFragment"
+        android:name="com.example.focusmate.BlockedAppsFragment"
+        android:label="BlockedAppsFragment"
+        tools:layout="@layout/fragment_blocked_apps"/>
+
+</navigation>

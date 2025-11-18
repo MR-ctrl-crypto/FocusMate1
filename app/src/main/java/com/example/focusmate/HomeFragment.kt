@@ -1,34 +1,41 @@
 package com.example.focusmate
 
-import android.graphics.Color
+import android.app.AlertDialog
+import android.content.Intent
 import android.os.Bundle
+import android.provider.Settings
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
+import android.widget.Toast
 import androidx.fragment.app.Fragment
-import androidx.navigation.fragment.findNavController // <-- IMPORTANT: Import NavController
-import com.github.mikephil.charting.charts.PieChart
-import com.github.mikephil.charting.data.PieData
-import com.github.mikephil.charting.data.PieDataSet
-import com.github.mikephil.charting.data.PieEntry
+import androidx.navigation.fragment.findNavController
 import com.google.android.material.card.MaterialCardView
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
+import java.util.Calendar
+import java.util.concurrent.TimeUnit
 
 class HomeFragment : Fragment() {
 
     private lateinit var totalFocusTimeText: TextView
     private lateinit var focusStreakText: TextView
     private lateinit var motivationalQuoteText: TextView
-    private lateinit var pieChart: PieChart
     private lateinit var startSessionButton: Button
     private lateinit var viewTimetableCard: MaterialCardView
+    private lateinit var viewBlockedAppsCard: MaterialCardView // <-- ADDED THIS
+
+    private val databaseUrl = "https://focusmate-51ac3-default-rtdb.europe-west1.firebasedatabase.app"
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_home, container, false)
     }
 
@@ -39,75 +46,83 @@ class HomeFragment : Fragment() {
         totalFocusTimeText = view.findViewById(R.id.text_total_focus_time)
         focusStreakText = view.findViewById(R.id.text_focus_streak)
         motivationalQuoteText = view.findViewById(R.id.text_motivational_quote)
-        pieChart = view.findViewById(R.id.pie_chart_screen_time)
         startSessionButton = view.findViewById(R.id.button_start_new_session)
-        viewTimetableCard = view.findViewById(R.id.card_view_timetable) // Correct ID
+        viewTimetableCard = view.findViewById(R.id.card_view_timetable)
+        viewBlockedAppsCard = view.findViewById(R.id.card_view_blocked_apps) // <-- ADDED THIS
 
-        // Call the functions to populate the UI with data
-        loadFocusData()
-        setupPieChart()
-        loadPieChartData()
         loadMotivationalQuote()
-
-        // Setup button click listeners for navigation
-        setupClickListeners()
+        setupClickListeners() // Setup navigation listeners
     }
 
-
-    private fun loadFocusData() {
-        // TODO: Replace with actual logic to fetch data from SharedPreferences or a database
-        val totalMinutes = 95 // Example: 1h 35m
-        val hours = totalMinutes / 60
-        val minutes = totalMinutes % 60
-        totalFocusTimeText.text = "${hours}h ${minutes}m"
-
-        val streakDays = 5
-        focusStreakText.text = "$streakDays Days"
+    override fun onResume() {
+        super.onResume()
+        loadFocusDataFromFirebase()
     }
 
-    private fun setupPieChart() {
-        pieChart.isDrawHoleEnabled = true // Creates the donut chart style
-        pieChart.holeRadius = 75f
-        pieChart.setHoleColor(Color.TRANSPARENT)
-
-        // Disable all extra chart elements for a minimal look
-        pieChart.setUsePercentValues(true)
-        pieChart.description.isEnabled = false
-        pieChart.legend.isEnabled = false
-        pieChart.setDrawEntryLabels(false)
-        pieChart.isRotationEnabled = false
-        pieChart.isHighlightPerTapEnabled = false
-    }
-
-    private fun loadPieChartData() {
-        // TODO: Replace with live data from screen time statistics
-        val focusedPercentage = 65f
-        val distractedPercentage = 35f
-
-        val entries = ArrayList<PieEntry>().apply {
-            add(PieEntry(focusedPercentage, "Focused"))
-            add(PieEntry(distractedPercentage, "Distracted"))
+    private fun loadFocusDataFromFirebase() {
+        val userId = FirebaseAuth.getInstance().currentUser?.uid
+        if (userId == null) {
+            totalFocusTimeText.text = "0h 0m"
+            focusStreakText.text = "0 Days"
+            return
         }
 
-        // Get the primary color from the current theme attribute
-        val typedValue = android.util.TypedValue()
-        // CORRECTED TYPO: It should be R.attr, not com.google.android.material.R.attr
-        requireContext().theme.resolveAttribute(android.R.attr.colorPrimary, typedValue, true)
-        val primaryColor = typedValue.data
+        val databaseRef = FirebaseDatabase.getInstance(databaseUrl).getReference("sessions").child(userId)
 
-        val colors = ArrayList<Int>().apply {
-            // Use the theme color we just resolved
-            add(primaryColor)
-            add(Color.parseColor("#E0E0E0")) // Light gray
+        databaseRef.addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val sessions = snapshot.children.mapNotNull { it.getValue(FocusSession::class.java) }
+                val totalMinutes = sessions.sumOf { it.durationMinutes }
+                val hours = totalMinutes / 60
+                val minutes = totalMinutes % 60
+                totalFocusTimeText.text = "${hours}h ${minutes}m"
+                val streakDays = calculateFocusStreak(sessions)
+                focusStreakText.text = "$streakDays Days"
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                Toast.makeText(context, "Failed to load home screen data: ${error.message}", Toast.LENGTH_LONG).show()
+            }
+        })
+    }
+
+    private fun calculateFocusStreak(sessions: List<FocusSession>): Int {
+        if (sessions.isEmpty()) {
+            return 0
         }
+        val uniqueDays = sessions
+            .map { session ->
+                val cal = Calendar.getInstance().apply { timeInMillis = session.endTimestamp }
+                cal.set(Calendar.HOUR_OF_DAY, 0)
+                cal.set(Calendar.MINUTE, 0)
+                cal.set(Calendar.SECOND, 0)
+                cal.set(Calendar.MILLISECOND, 0)
+                cal.timeInMillis
+            }
+            .toSet()
+            .sortedDescending()
 
-        val dataSet = PieDataSet(entries, "Screen Time")
-        dataSet.colors = colors
-        dataSet.setDrawValues(false) // Hide the percentage values on the chart slices
+        var streak = 0
+        val today = Calendar.getInstance()
+        today.set(Calendar.HOUR_OF_DAY, 0)
+        today.set(Calendar.MINUTE, 0)
+        today.set(Calendar.SECOND, 0)
+        today.set(Calendar.MILLISECOND, 0)
 
-        val data = PieData(dataSet)
-        pieChart.data = data
-        pieChart.invalidate() // Refresh the chart
+        if (uniqueDays.first() >= today.timeInMillis || uniqueDays.first() >= today.timeInMillis - TimeUnit.DAYS.toMillis(1)) {
+            streak = 1
+            var lastDay = uniqueDays.first()
+            for (i in 1 until uniqueDays.size) {
+                val currentDay = uniqueDays[i]
+                if (lastDay - currentDay == TimeUnit.DAYS.toMillis(1)) {
+                    streak++
+                    lastDay = currentDay
+                } else {
+                    break
+                }
+            }
+        }
+        return streak
     }
 
     private fun loadMotivationalQuote() {
@@ -121,17 +136,42 @@ class HomeFragment : Fragment() {
         motivationalQuoteText.text = quotes.random()
     }
 
-    // ======================= CORRECTED NAVIGATION LOGIC =======================
     private fun setupClickListeners() {
         startSessionButton.setOnClickListener {
-            // Navigate to the TimerFragment using the action from nav_graph.xml
             findNavController().navigate(R.id.action_homeFragment_to_timerFragment)
         }
 
         viewTimetableCard.setOnClickListener {
-            // Navigate to the TimetableFragment using the action from nav_graph.xml
             findNavController().navigate(R.id.action_homeFragment_to_timetableFragment)
         }
+
+        // --- NEW CLICK LISTENER FOR BLOCKED APPS ---
+        viewBlockedAppsCard.setOnClickListener {
+            // Check for notification permission first
+            if (!isNotificationServiceEnabled()) {
+                // Guide user to settings if permission is not granted
+                showPermissionDialog()
+            } else {
+                // If permission is granted, navigate to the fragment
+                findNavController().navigate(R.id.action_homeFragment_to_blockedAppsFragment)
+            }
+        }
     }
-    // ======================= END OF CORRECTIONS =======================
+
+    // --- NEW HELPER FUNCTIONS FOR PERMISSION ---
+    private fun isNotificationServiceEnabled(): Boolean {
+        val enabledListeners = Settings.Secure.getString(requireContext().contentResolver, "enabled_notification_listeners")
+        return enabledListeners?.contains(requireContext().packageName) == true
+    }
+
+    private fun showPermissionDialog() {
+        AlertDialog.Builder(requireContext())
+            .setTitle("Permission Required")
+            .setMessage("To block notifications, FocusMate needs access to your notifications. Please enable it in the next screen.")
+            .setPositiveButton("Go to Settings") { _, _ ->
+                startActivity(Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS))
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
+    }
 }

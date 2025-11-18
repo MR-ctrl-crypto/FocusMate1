@@ -45,4 +45,22 @@
     <color name="timer_circle_light">#E8EEF3</color>
     <color name="timer_text_light">#9E9E9E</color>
 
+    <!-- Add these to your existing colors.xml -->
+
+    <!-- Dark Mode Palette -->
+    <color name="dark_primary_blue">#A0C8FF</color>       <!-- Lighter blue for dark backgrounds -->
+    <color name="dark_primary_blue_dark">#2E5DA8</color>  <!-- A deep blue for containers -->
+    <color name="dark_pause_green">#98F598</color>        <!-- Lighter green -->
+    <color name="dark_stop_red">#FF8A80</color>           <!-- Lighter red -->
+
+    <color name="dark_background">#121212</color>          <!-- Standard dark background -->
+    <color name="dark_surface">#1E1E1E</color>            <!-- Slightly lighter surface for cards -->
+
+    <color name="dark_text_primary">#E0E0E0</color>       <!-- Off-white for primary text -->
+    <color name="dark_text_secondary">#9E9E9E</color>    <!-- Gray for secondary text -->
+
+    <color name="dark_divider_gray">#424242</color>       <!-- A visible divider for dark BG -->
+    <color name="dark_switch_track_off">#757575</color>  <!-- Darker track for off state -->
+
+
 </resources>
