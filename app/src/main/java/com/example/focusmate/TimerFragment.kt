@@ -88,8 +88,6 @@ class TimerFragment : Fragment() {
         startButton = view.findViewById(R.id.button_start)
         stopButton = view.findViewById(R.id.button_stop)
         editTimerButton = view.findViewById(R.id.button_edit_timer)
-        silenceNotificationsSwitch = view.findViewById(R.id.switch_silence_notifications)
-        blockSocialMediaSwitch = view.findViewById(R.id.switch_block_social_media)
         badgesContainer = view.findViewById(R.id.badges_container)
 
         // Initialize SharedPreferences
