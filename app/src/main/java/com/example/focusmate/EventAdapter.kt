@@ -38,7 +38,7 @@ class EventAdapter(
 
         // Set the data for each view
         val timeFormat = SimpleDateFormat("hh:mm a", Locale.getDefault())
-        holder.time.text = timeFormat.format(event.date)
+        holder.time.text = timeFormat.format(event.timestamp)
         holder.name.text = event.name
         holder.location.text = event.location
 

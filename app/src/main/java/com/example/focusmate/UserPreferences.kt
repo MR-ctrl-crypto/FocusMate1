@@ -27,14 +27,7 @@ class UserPreferences(context: Context) {
         return prefs.getString(KEY_USER_NAME, DEFAULT_NAME) ?: DEFAULT_NAME
     }
 
-    // --- DEPRECATED/REPLACED ---
-    // We will use the String version directly to be more explicit
-    /*
-    fun getProfileImageUri(): Uri? {
-        val uriString = prefs.getString(KEY_PROFILE_IMAGE_URI, null)
-        return if (uriString != null) Uri.parse(uriString) else null
-    }
-    */
+
 
     // --- NEW function to get the URI as a String ---
     fun getProfileImageUriString(): String? {

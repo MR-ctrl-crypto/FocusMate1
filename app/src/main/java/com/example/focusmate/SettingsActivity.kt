@@ -1,89 +1,76 @@
 package com.example.focusmate
 
-import android.content.Intent
-import android.net.Uri // 1. IMPORT URI and Log
 import android.os.Bundle
 import android.util.Log
-import android.view.Menu
-import android.view.MenuItem
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
+import androidx.navigation.fragment.NavHostFragment
+import androidx.navigation.ui.setupActionBarWithNavController
+import com.squareup.picasso.Picasso
 
 class SettingsActivity : AppCompatActivity() {
 
-    private lateinit var userPreferences: UserPreferences
+    // Use the modern ProfileViewModel to get user data from Firebase
+    private val profileViewModel: ProfileViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_settings)
 
+        // --- Setup Toolbar and Navigation ---
         val toolbar: Toolbar = findViewById(R.id.toolbar)
-        supportActionBar?.setDisplayShowTitleEnabled(false)
+        setSupportActionBar(toolbar)
 
-        userPreferences = UserPreferences(this)
+        // Find the NavHostFragment and its NavController
+        val navHostFragment = supportFragmentManager
+            .findFragmentById(R.id.settings_container) as NavHostFragment
+        val navController = navHostFragment.navController
 
-        if (savedInstanceState == null) {
-            supportFragmentManager
-                .beginTransaction()
-                .replace(R.id.settings_container, SettingsFragment())
-                .commit()
-        }
+        // Link the ActionBar to the NavController for title updates and the back arrow
+        setupActionBarWithNavController(navController)
+
+        // --- Observe LiveData from the ViewModel ---
+        observeProfileData(toolbar)
     }
 
     override fun onResume() {
         super.onResume()
-        // This tells the menu to redraw itself, which will call onCreateOptionsMenu again
-        // and refresh the user's name and profile picture.
-        invalidateOptionsMenu()
+        // Refresh the user profile data every time the screen becomes visible
+        profileViewModel.fetchUserProfile()
     }
 
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        menuInflater.inflate(R.menu.settings_menu, menu)
+    private fun observeProfileData(toolbar: Toolbar) {
+        val toolbarUserName: TextView? = toolbar.findViewById(R.id.toolbar_user_name)
+        val toolbarProfileImage: ImageView? = toolbar.findViewById(R.id.toolbar_profile_image)
 
-        val profileMenuItem = menu.findItem(R.id.action_profile)
-        val actionView = profileMenuItem.actionView
-
-        val toolbarUserName: TextView? = actionView?.findViewById(R.id.toolbar_user_name)
-        val toolbarProfileImage: ImageView? = actionView?.findViewById(R.id.toolbar_profile_image)
-
-        actionView?.setOnClickListener {
-            onOptionsItemSelected(profileMenuItem)
+        // Observe the username LiveData
+        profileViewModel.username.observe(this) { name ->
+            toolbarUserName?.text = name ?: "User"
+            Log.d("SettingsActivity", "Username updated in toolbar: $name")
         }
 
-        // --- UPDATED UI LOGIC ---
-        toolbarUserName?.text = userPreferences.getUserName()
-        val imageUriString = userPreferences.getProfileImageUriString()
-
-        if (!imageUriString.isNullOrEmpty()) {
-            val imageUri = Uri.parse(imageUriString)
-            try {
-                // Because we took persistent permission, this should now work without crashing.
-                toolbarProfileImage?.setImageURI(imageUri)
-            } catch (e: SecurityException) {
-                // This is a safety net. If permission is lost, we won't crash.
-                Log.e("SettingsActivity", "Permission denial for profile URI: $imageUri", e)
-                // Fall back to a default image
-                toolbarProfileImage?.setImageResource(R.mipmap.ic_launcher_round)
+        // Observe the profile image URI LiveData
+        profileViewModel.profileImageUri.observe(this) { uri ->
+            if (uri != null) {
+                Picasso.get()
+                    .load(uri)
+                    .placeholder(R.drawable.ic_profile_placeholder) // Use a placeholder
+                    .error(R.drawable.ic_profile_placeholder)       // Use an error image
+                    .into(toolbarProfileImage)
+            } else {
+                toolbarProfileImage?.setImageResource(R.drawable.ic_profile_placeholder)
             }
-        } else {
-            // Set a default image if no URI is saved
-            toolbarProfileImage?.setImageResource(R.mipmap.ic_launcher_round)
+            Log.d("SettingsActivity", "Profile image updated in toolbar.")
         }
-        // --- END OF UPDATED LOGIC ---
-
-        return true
     }
 
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        return when (item.itemId) {
-            R.id.action_profile -> {
-                val intent = Intent(this, ManageAccountActivity::class.java)
-                startActivity(intent)
-                true
-            }
-            else -> super.onOptionsItemSelected(item)
-        }
+    // This is crucial for making the toolbar's back arrow work
+    override fun onSupportNavigateUp(): Boolean {
+        val navHostFragment = supportFragmentManager.findFragmentById(R.id.settings_container) as NavHostFragment
+        val navController = navHostFragment.navController
+        return navController.navigateUp() || super.onSupportNavigateUp()
     }
 }

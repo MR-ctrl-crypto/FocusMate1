@@ -4,6 +4,10 @@
 
     <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES"
         tools:ignore="QueryAllPackagesPermission" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
+
 
     <application
         android:allowBackup="true"
@@ -16,7 +20,6 @@
         android:theme="@style/Theme.FocusMate"
         tools:targetApi="31">
 
-        <!-- This is now the LAUNCHER activity -->
         <activity
             android:name=".AuthActivity"
             android:exported="true">
@@ -26,19 +29,16 @@
             </intent-filter>
         </activity>
 
-        <!-- THIS IS NOW THE ONE AND ONLY LAUNCHER ACTIVITY -->
         <activity
             android:name=".MainActivity"
             android:exported="false">
         </activity>
 
-        <!-- SETTINGS ACTIVITY IS NO LONGER A LAUNCHER -->
-        <!-- The intent-filter has been removed from here. -->
+        <!-- THIS IS THE FIX: The explicit theme has been removed -->
+        <!-- It will now correctly inherit the main application theme -->
         <activity
             android:name=".SettingsActivity"
-            android:exported="false"
-            android:theme="@style/Theme.AppCompat.DayNight">
-            <!-- No intent filter here -->
+            android:exported="false">
         </activity>
 
         <activity
@@ -47,17 +47,27 @@
             android:label="Manage Account">
         </activity>
 
+        <service
+            android:name=".TimerService"
+            android:enabled="true"
+            android:exported="false"
+            android:foregroundServiceType="dataSync"/>
 
-<!--Deprecated-->
-<!--        <activity-->
-<!--            android:name=".BlockedAppsActivity"-->
-<!--            android:exported="false"-->
-<!--            android:label="Select Apps to Block"-->
-<!--            android:parentActivityName=".SettingsActivity">-->
-<!--            <meta-data-->
-<!--                android:name="android.support.PARENT_ACTIVITY"-->
-<!--                android:value=".SettingsActivity" />-->
-<!--        </activity>-->
+        <service
+            android:name=".SoundService"
+            android:enabled="true"
+            android:exported="false"
+            android:foregroundServiceType="mediaPlayback" />
+
+        <service
+            android:name=".NotificationBlockerService"
+            android:label="FocusMate Notification Blocker"
+            android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.service.notification.NotificationListenerService" />
+            </intent-filter>
+        </service>
 
     </application>
 </manifest>

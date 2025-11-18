@@ -1,106 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/nav_graph"
-    app:startDestination="@id/signUpFragment">
+    app:startDestination="@id/auth_graph">
 
-    <!-- Authentication Flow -->
-    <fragment
-        android:id="@+id/signUpFragment"
-        android:name="com.example.focusmate.SignUpFragment"
-        android:label="fragment_sign_up"
-        tools:layout="@layout/fragment_sign_up">
-        <action
-            android:id="@+id/action_signUpFragment_to_loginFragment"
-            app:destination="@id/loginFragment" />
-    </fragment>
+    <!-- This graph includes the authentication flow -->
+    <include app:graph="@navigation/auth_graph" />
 
-    <fragment
-        android:id="@+id/loginFragment"
-        android:name="com.example.focusmate.LoginFragment"
-        android:label="fragment_login"
-        tools:layout="@layout/fragment_login">
-        <action
-            android:id="@+id/action_loginFragment_to_signUpFragment"
-            app:destination="@id/signUpFragment" />
-    </fragment>
+    <!-- This graph includes the main app flow -->
+    <include app:graph="@navigation/main_graph" />
 
-    <!-- Main App Fragments (used by MainActivity's BottomNavigationView) -->
-    <!-- These are mostly placeholders for the graph's awareness -->
-
-    <fragment
-        android:id="@+id/homeFragment"
-        android:name="com.example.focusmate.HomeFragment"
-        android:label="fragment_home"
-        tools:layout="@layout/fragment_home">
-        <!-- Action from Home screen TO Timetable -->
-        <action
-            android:id="@+id/action_homeFragment_to_timetableFragment"
-            app:destination="@id/timetableFragment" />
-        <!-- Action from Home screen TO Timer -->
-        <action
-            android:id="@+id/action_homeFragment_to_timerFragment"
-            app:destination="@id/timerFragment" />
-    </fragment>
-
-    <fragment
-        android:id="@+id/analyticsFragment"
-        android:name="com.example.focusmate.AnalyticsFragment"
-        android:label="fragment_analytics"
-        tools:layout="@layout/fragment_analytics" />
-
-    <fragment
-        android:id="@+id/TimeTableFragment"
-        android:name="com.example.focusmate.TimetableFragment"
-        android:label="fragment_community"
-        tools:layout="@layout/fragment_timetable" />
-
-    <fragment
-        android:id="@+id/settingsFragment"
-        android:name="com.example.focusmate.SettingsFragment"
-        android:label="fragment_settings"
-        tools:layout="@xml/preferences">
-        <!-- Action from Settings screen TO Manage Account -->
-        <action
-            android:id="@+id/action_settingsFragment_to_manageAccountFragment"
-            app:destination="@id/manageAccountFragment" />
-        <!-- Action from Settings screen TO Blocked Apps -->
-        <action
-            android:id="@+id/action_settingsFragment_to_blockedAppsFragment"
-            app:destination="@id/blockedAppsFragment" />
-    </fragment>
-
-    <!-- ======================= NEW DESTINATIONS FOR YOUR BUTTONS ======================= -->
-
-    <!-- Destination for "Manage Account" button -->
-    <fragment
-        android:id="@+id/manageAccountFragment"
-        android:name="com.example.focusmate.ManageAccountFragment"
-        android:label="fragment_manage_account"
-        tools:layout="@layout/fragment_manage_account" />
-
-    <!-- Destination for "Blocked Apps" button -->
-    <fragment
-        android:id="@+id/blockedAppsFragment"
-        android:name="com.example.focusmate.BlockedAppsFragment"
-        android:label="fragment_blocked_apps"
-        tools:layout="@layout/fragment_blocked_apps" />
-
-    <!-- Destination for "Timetable" button on home screen -->
-    <fragment
-        android:id="@+id/timetableFragment"
-        android:name="com.example.focusmate.TimetableFragment"
-        android:label="fragment_timetable"
-        tools:layout="@layout/fragment_timetable" />
-
-    <!-- Destination for "Timer" button on home screen -->
-    <fragment
-        android:id="@+id/timerFragment"
-        android:name="com.example.focusmate.TimerFragment"
-        android:label="fragment_timer"
-        tools:layout="@layout/fragment_timer" />
-
-    <!-- ============================================================================== -->
+    <!-- A "global" action to move from the auth flow to the main app flow -->
+    <action
+        android:id="@+id/action_global_main_graph"
+        app:destination="@id/main_graph"
+        app:popUpTo="@id/auth_graph"
+        app:popUpToInclusive="true" />
 
 </navigation>

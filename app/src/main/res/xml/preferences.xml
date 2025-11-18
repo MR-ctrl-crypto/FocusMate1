@@ -1,58 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <PreferenceCategory app:title="Account">
-
-        <Preference
-            app:key="user_account"
-            app:title="Email"
-            app:summary="Loading..." />
-
-        <Preference
-            app:key="manage_account"
-            app:title="Manage Account"
-            app:summary="Update your profile or change password" />
-
-        <SwitchPreference
-            app:key="cloud_sync"
-            app:title="Cloud Sync"
-            app:summary="Sync your settings across devices"
-            app:defaultValue="false" />
-
-    </PreferenceCategory>
-
-    <PreferenceCategory app:title="General">
-
-        <SwitchPreference
-            app:key="notifications"
-            app:title="Enable Notifications"
-            app:defaultValue="true" />
+    <PreferenceCategory app:title="Appearance">
 
         <ListPreference
             app:key="theme_preference"
             app:title="Theme"
-            app:summary="%s"
+            app:summary="Choose the application theme"
             app:entries="@array/theme_entries"
             app:entryValues="@array/theme_values"
-            app:defaultValue="auto" />
+            app:defaultValue="system" />
 
     </PreferenceCategory>
 
-    <!-- ======================= CORRECTED SECTION ======================= -->
-    <!-- This section is now a single, simple Preference that will act as a button. -->
-    <PreferenceCategory app:title="Focus Settings">
+    <PreferenceCategory app:title="Account">
 
         <Preference
-            app:key="blocked_apps"
-            app:title="Blocked Apps"
-            app:summary="Select which applications to block"
-            app:icon="@drawable/ic_block" />
+            app:key="manage_account"
+            app:title="Manage Account"
+            app:summary="Change your username and picture" />
 
-        <!-- The EditTextPreference has been removed. -->
-        <!-- Your SettingsFragment will now correctly launch BlockedAppsActivity -->
-        <!-- when this "blocked_apps" preference is clicked. -->
+        <!-- ==================================================== -->
+        <!-- THIS IS THE MISSING PIECE. ADD THIS BLOCK OF CODE.    -->
+        <!-- ==================================================== -->
+        <Preference
+            app:key="logout"
+            app:title="Logout"
+            app:summary="Sign out of your account" />
+        <!-- ==================================================== -->
 
     </PreferenceCategory>
-    <!-- ===================== END OF CORRECTED SECTION ==================== -->
 
 </PreferenceScreen>
+

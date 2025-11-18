@@ -1,18 +1,20 @@
 package com.example.focusmate
 
+import android.app.AlertDialog
 import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
-import android.widget.EditText
 import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.observe
 import androidx.navigation.fragment.findNavController
+import com.google.android.material.textfield.TextInputEditText
 
 class LoginFragment : Fragment() {
 
@@ -31,11 +33,25 @@ class LoginFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         // Find the views from the layout using their IDs
-        val emailEditText = view.findViewById<EditText>(R.id.edit_text_email)
-        val passwordEditText = view.findViewById<EditText>(R.id.edit_text_password)
+        val emailEditText = view.findViewById<TextInputEditText>(R.id.edit_text_email)
+        val passwordEditText = view.findViewById<TextInputEditText>(R.id.edit_text_password)
         val loginButton = view.findViewById<Button>(R.id.button_login)
         val signUpPromptTextView = view.findViewById<TextView>(R.id.text_signup_prompt)
+        val forgotPasswordTextView = view.findViewById<TextView>(R.id.text_forgot_password)
         val progressBar = view.findViewById<ProgressBar>(R.id.progress_bar)
+
+        // --- OBSERVERS for ViewModel LiveData ---
+
+        // Observer for the password reset result
+        authViewModel.passwordResetStatus.observe(viewLifecycleOwner) { isSuccess ->
+            if (isSuccess) {
+                Toast.makeText(context, "Password reset link sent successfully.", Toast.LENGTH_LONG).show()
+            } else {
+                Toast.makeText(context, "Failed to send reset link. Check the email address.", Toast.LENGTH_LONG).show()
+            }
+        }
+
+        // --- CLICK LISTENERS for UI elements ---
 
         // Set the click listener for the main login button
         loginButton.setOnClickListener {
@@ -66,6 +82,8 @@ class LoginFragment : Fragment() {
 
                     // Create an Intent to start MainActivity
                     val intent = Intent(activity, MainActivity::class.java)
+                    // Add flags to clear the back stack and start fresh
+                    intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
                     startActivity(intent)
 
                     // Finish the current AuthActivity so the user cannot press 'back' to return to it.
@@ -77,6 +95,29 @@ class LoginFragment : Fragment() {
                 }
             }
         }
+
+        // Set the click listener for the "Forgot Password?" text
+        forgotPasswordTextView.setOnClickListener {
+            val email = emailEditText.text.toString().trim()
+
+            // Check if the user has entered an email
+            if (email.isEmpty()) {
+                Toast.makeText(context, "Please enter your email address first.", Toast.LENGTH_LONG).show()
+                return@setOnClickListener
+            }
+
+            // Show a dialog to confirm the action
+            AlertDialog.Builder(requireContext())
+                .setTitle("Reset Password")
+                .setMessage("A password reset link will be sent to '$email'. Proceed?")
+                .setPositiveButton("Send") { _, _ ->
+                    // Call the ViewModel to handle the password reset
+                    authViewModel.sendPasswordResetEmail(email)
+                }
+                .setNegativeButton("Cancel", null)
+                .show()
+        }
+
 
         // Set the click listener for the "Don't have an account?" text
         signUpPromptTextView.setOnClickListener {

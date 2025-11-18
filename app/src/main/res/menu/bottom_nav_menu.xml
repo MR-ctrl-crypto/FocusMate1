@@ -2,28 +2,28 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
-        android:id="@+id/nav_home"
+        android:id="@+id/homeFragment"
         android:icon="@drawable/ic_home"
-        android:title="Home" />
+        android:title="@string/home" />
 
     <item
-        android:id="@+id/nav_analytics"
-        android:icon="@drawable/ic_analytics"
-        android:title="Analytics" />
-
-    <item
-        android:id="@+id/nav_timetable"
-        android:icon="@drawable/ic_timetable"
-        android:title="Timetable" />
-
-    <item
-        android:id="@+id/nav_timer"
+        android:id="@+id/timerFragment"
         android:icon="@drawable/ic_timer"
-        android:title="Timer" />
+        android:title="@string/timer" />
 
     <item
-        android:id="@+id/nav_settings"
+        android:id="@+id/timetableFragment"
+        android:icon="@drawable/ic_timetable"
+        android:title="@string/timetable" />
+
+    <item
+        android:id="@+id/analyticsFragment"
+        android:icon="@drawable/ic_analytics"
+        android:title="@string/analytics" />
+
+    <item
+        android:id="@+id/settingsFragment"
         android:icon="@drawable/ic_settings"
-        android:title="Settings" />
+        android:title="@string/settings" />
 
 </menu>

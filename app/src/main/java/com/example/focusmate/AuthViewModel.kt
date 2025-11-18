@@ -1,72 +1,65 @@
 package com.example.focusmate
 
+import android.util.Log
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.auth
-import com.google.firebase.auth.userProfileChangeRequest
 
 class AuthViewModel : ViewModel() {
 
-    // Get a reference to the Firebase Authentication service
-    private val auth: FirebaseAuth = Firebase.auth
+    private val auth: FirebaseAuth = FirebaseAuth.getInstance()
 
-    // --- Sign Up Function ---
-    fun signUp(email: String, pass: String, fullName: String, onComplete: (Boolean, String?) -> Unit) {
-        // Basic validation
-        if (email.isEmpty() || pass.isEmpty() || fullName.isEmpty()) {
-            onComplete(false, "All fields are required.")
-            return
-        }
+    // LiveData for password reset status
+    private val _passwordResetStatus = MutableLiveData<Boolean>()
+    val passwordResetStatus: LiveData<Boolean> = _passwordResetStatus
 
-        // Use Firebase to create a new user with email and password
-        auth.createUserWithEmailAndPassword(email, pass)
+    /**
+     * Signs a user up with email and password.
+     * The callback will contain success status and an optional error message.
+     */
+    fun signUp(email: String, password: String, callback: (Boolean, String?) -> Unit) {
+        auth.createUserWithEmailAndPassword(email, password)
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
-                    // Sign up success
-                    val user = auth.currentUser
-
-                    // Create a request to update the user's profile with their name
-                    val profileUpdates = userProfileChangeRequest {
-                        displayName = fullName
-                    }
-
-                    // Apply the profile update
-                    user?.updateProfile(profileUpdates)
-                        ?.addOnCompleteListener { profileTask ->
-                            if (profileTask.isSuccessful) {
-                                // Profile updated successfully
-                                onComplete(true, null)
-                            } else {
-                                // Profile update failed, but signup succeeded.
-                                // You can decide how to handle this. For now, we'll treat it as a success.
-                                onComplete(true, "Couldn't set display name.")
-                            }
-                        }
+                    // Registration successful
+                    callback(true, null)
                 } else {
-                    // If sign up fails, pass the error message back
-                    val errorMessage = task.exception?.message ?: "An unknown error occurred."
-                    onComplete(false, errorMessage)
+                    // Registration failed, provide the error message
+                    callback(false, task.exception?.message)
                 }
             }
     }
 
-    // --- Login Function (You will need this for your LoginScreen) ---
-    fun logIn(email: String, pass: String, onComplete: (Boolean, String?) -> Unit) {
-        if (email.isEmpty() || pass.isEmpty()) {
-            onComplete(false, "Email and password cannot be empty.")
-            return
-        }
-
-        auth.signInWithEmailAndPassword(email, pass)
+    /**
+     * Logs a user in with email and password.
+     * The callback will contain success status and an optional error message.
+     */
+    fun logIn(email: String, password: String, callback: (Boolean, String?) -> Unit) {
+        auth.signInWithEmailAndPassword(email, password)
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
-                    // Sign in success
-                    onComplete(true, null)
+                    // Login successful
+                    callback(true, null)
                 } else {
-                    // If sign in fails, pass the error message back
-                    val errorMessage = task.exception?.message ?: "Login failed. Please check your credentials."
-                    onComplete(false, errorMessage)
+                    // Login failed, provide the error message
+                    callback(false, task.exception?.message)
+                }
+            }
+    }
+
+    /**
+     * Sends a password reset email to the given email address via Firebase.
+     * Updates the passwordResetStatus LiveData with the result.
+     */
+    fun sendPasswordResetEmail(email: String) {
+        auth.sendPasswordResetEmail(email)
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    _passwordResetStatus.postValue(true)
+                } else {
+                    Log.w("AuthViewModel", "sendPasswordResetEmail:failure", task.exception)
+                    _passwordResetStatus.postValue(false)
                 }
             }
     }

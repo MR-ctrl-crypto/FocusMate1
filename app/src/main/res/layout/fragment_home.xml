@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout
+<androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -8,18 +8,24 @@
     android:background="?attr/colorSurface"
     tools:context=".HomeFragment">
 
+    <!-- Scrollable Content Area -->
     <androidx.core.widget.NestedScrollView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:id="@+id/nested_scroll_view"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
         android:clipToPadding="false"
-        android:paddingBottom="24dp">
+        app:layout_constraintBottom_toTopOf="@+id/sounds_title"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:paddingStart="16dp"
-            android:paddingEnd="16dp">
+            android:paddingEnd="16dp"
+            android:paddingBottom="16dp">
 
             <!-- Today's Focus Time Card -->
             <com.google.android.material.card.MaterialCardView
@@ -29,20 +35,17 @@
                 app:cardCornerRadius="18dp"
                 app:cardElevation="4dp"
                 app:cardBackgroundColor="?attr/colorSurfaceContainer">
-
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
                     android:padding="20dp">
-
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Today’s Focus Time"
                         android:textColor="?android:attr/textColorSecondary"
                         android:textSize="16sp" />
-
                     <TextView
                         android:id="@+id/text_total_focus_time"
                         android:layout_width="wrap_content"
@@ -52,7 +55,6 @@
                         android:textSize="48sp"
                         android:textStyle="bold"
                         tools:text="1h 25m" />
-
                     <Button
                         android:id="@+id/button_start_new_session"
                         style="@style/Widget.MaterialComponents.Button.TextButton"
@@ -66,90 +68,7 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Screen Time Overview Card -->
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                app:cardCornerRadius="18dp"
-                app:cardElevation="4dp"
-                app:cardBackgroundColor="?attr/colorSurfaceContainer">
-
-                <androidx.constraintlayout.widget.ConstraintLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:padding="20dp">
-
-                    <TextView
-                        android:id="@+id/title_screen_time"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Screen Time Overview"
-                        android:textColor="?attr/colorOnSurface"
-                        android:textSize="18sp"
-                        android:textStyle="bold"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent" />
-
-                    <com.github.mikephil.charting.charts.PieChart
-                        android:id="@+id/pie_chart_screen_time"
-                        android:layout_width="160dp"
-                        android:layout_height="160dp"
-                        android:layout_marginTop="16dp"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintTop_toBottomOf="@id/title_screen_time"/>
-
-                    <!-- Legend -->
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="16dp"
-                        android:orientation="horizontal"
-                        app:layout_constraintTop_toBottomOf="@id/pie_chart_screen_time"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintEnd_toEndOf="parent">
-
-                        <LinearLayout
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:gravity="center_vertical"
-                            android:orientation="horizontal">
-                            <View
-                                android:layout_width="12dp"
-                                android:layout_height="12dp"
-                                android:background="?attr/colorPrimary"/>
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_marginStart="8dp"
-                                android:text="Focused"
-                                android:textColor="?attr/colorOnSurface"/>
-                        </LinearLayout>
-
-                        <LinearLayout
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:gravity="center_vertical"
-                            android:orientation="horizontal">
-                            <View
-                                android:layout_width="12dp"
-                                android:layout_height="12dp"
-                                android:background="#E0E0E0"/>
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_marginStart="8dp"
-                                android:text="Distracted"
-                                android:textColor="?attr/colorOnSurface"/>
-                        </LinearLayout>
-                    </LinearLayout>
-                </androidx.constraintlayout.widget.ConstraintLayout>
-            </com.google.android.material.card.MaterialCardView>
-
-            <!-- Row for Streak and Timetable -->
+            <!-- Row for Streak and Block Apps -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -166,13 +85,11 @@
                     app:cardCornerRadius="18dp"
                     app:cardElevation="4dp"
                     app:cardBackgroundColor="?attr/colorSurfaceContainer">
-
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="vertical"
                         android:padding="20dp">
-
                         <TextView
                             android:id="@+id/text_focus_streak"
                             android:layout_width="wrap_content"
@@ -181,7 +98,6 @@
                             android:textSize="36sp"
                             android:textStyle="bold"
                             tools:text="5 Days" />
-
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
@@ -192,9 +108,9 @@
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
 
-                <!-- Timetable Card -->
+                <!-- Blocked Apps Card -->
                 <com.google.android.material.card.MaterialCardView
-                    android:id="@+id/card_view_timetable"
+                    android:id="@+id/card_view_blocked_apps"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
                     android:layout_weight="1"
@@ -203,32 +119,60 @@
                     app:cardElevation="4dp"
                     app:cardBackgroundColor="?attr/colorPrimary"
                     app:rippleColor="@color/white">
-
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:gravity="center"
                         android:orientation="vertical"
                         android:padding="20dp">
-
                         <ImageView
                             android:layout_width="40dp"
                             android:layout_height="40dp"
-                            android:src="@drawable/ic_calendar"
+                            android:src="@drawable/ic_notifications_off"
                             app:tint="@color/white"
-                            android:contentDescription="Timetable Icon"/>
-
+                            android:contentDescription="Blocked Apps Icon"/>
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="8dp"
-                            android:text="Manage"
+                            android:text="Block Apps"
                             android:textColor="@color/white"
                             android:textSize="16sp"
                             android:textStyle="bold" />
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
             </LinearLayout>
+
+            <!-- Timetable Card -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/card_view_timetable"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                app:cardCornerRadius="18dp"
+                app:cardElevation="4dp"
+                app:cardBackgroundColor="?attr/colorSurfaceContainer">
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:padding="20dp">
+                    <ImageView
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:src="@drawable/ic_calendar"
+                        app:tint="?attr/colorPrimary"
+                        android:contentDescription="Timetable Icon"/>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="16dp"
+                        android:text="Manage Timetable"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        android:textColor="?attr/colorOnSurface"/>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
 
             <!-- Motivational Quote Card -->
             <com.google.android.material.card.MaterialCardView
@@ -238,7 +182,6 @@
                 app:cardCornerRadius="18dp"
                 app:cardElevation="4dp"
                 app:cardBackgroundColor="?attr/colorSurfaceContainer">
-
                 <TextView
                     android:id="@+id/text_motivational_quote"
                     android:layout_width="match_parent"
@@ -253,4 +196,68 @@
 
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
-</androidx.coordinatorlayout.widget.CoordinatorLayout>
+
+
+    <!-- ======================================================== -->
+    <!--     SOUND PLAYER SECTION (ANCHORED TO BOTTOM OF SCREEN)    -->
+    <!-- ======================================================== -->
+
+    <TextView
+        android:id="@+id/sounds_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginBottom="8dp"
+        android:text="Ambient Sounds"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toTopOf="@id/sound_progress_bar"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <ImageButton
+        android:id="@+id/button_pause_sound"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_marginEnd="16dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:contentDescription="Pause Sound"
+        android:src="@drawable/ic_pause"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="@id/sounds_title"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@id/sounds_title"
+        app:tint="?attr/colorControlNormal"
+        tools:visibility="visible" />
+
+    <ProgressBar
+        android:id="@+id/sound_progress_bar"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="8dp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toTopOf="@id/sounds_recycler_view"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        tools:progress="60"
+        tools:visibility="visible" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/sounds_recycler_view"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:clipToPadding="false"
+        android:orientation="horizontal"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        tools:itemCount="2"
+        tools:listitem="@layout/item_sound" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
